@@ -27,3 +27,7 @@ type Section child msg
 
 type P child msg
     = P (Attrs msg) child
+
+
+
+-- Add more types for semantic elements below.

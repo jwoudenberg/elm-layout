@@ -2,7 +2,9 @@ module Example exposing (..)
 
 import Css exposing (Snippet, Style)
 import Html exposing (Attribute, Html)
+import Html.Attributes as Attr
 import Html.Events exposing (onClick)
+import Json.Encode
 import Layout exposing (Layout)
 import Semantic exposing (H2, P, Section)
 import Style exposing (Styling)
@@ -100,6 +102,24 @@ stylePost =
     Style.section
         [ Css.border3 (Css.px 1) Css.solid (Css.hex "#000000") ]
         Style.none
+
+
+css : String
+css =
+    Css.compile [ Style.stylesheet style ]
+        |> .css
+
+
+main : Html Msg
+main =
+    Html.div []
+        [ view page
+        , Html.node "style"
+            [ Attr.property "textContent" (Json.Encode.string css)
+            , Attr.property "type" (Json.Encode.string "text/css")
+            ]
+            []
+        ]
 
 
 type Msg

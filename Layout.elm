@@ -1,10 +1,21 @@
 module Layout exposing (Layout, col, col2, h1, h2, p, section, text, view)
 
+{-| The functions in this module can be used to define how a page type should be layed out on the page.
+-}
+
 import Html exposing (Html)
 import Html.Attributes as Attr
 import Semantic.Internal as Semantic exposing (Attrs)
 
 
+{-| The Layout type is an intermediate representation from the layout that then gets rendered into Html.
+
+The advantage of having such an in-between type over layout functions which return Html directly, is that we have the opportunity to inspect the entire layout tree and make optimizations based on that.
+For instance: if a Column is embedded into a Wrapper, we can use the Wrapper element as the container of the column, saving ourselves a div and producing cleaner output.
+
+This type is seriously incomplete. More constructures for other layout primitives should be included.
+
+-}
 type Layout msg
     = TextNode String
     | Wrapper Element (Attrs msg) (Layout msg)
@@ -80,10 +91,6 @@ view layout =
                     ]
                 ]
                 (List.map view children)
-
-
-
--- | Column (List (Layout msg))
 
 
 nodeFor : Element -> (Attrs msg -> List (Html msg) -> Html msg)
