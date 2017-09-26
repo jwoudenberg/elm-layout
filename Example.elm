@@ -5,14 +5,37 @@ import Html exposing (Attribute, Html)
 import Html.Attributes as Attr
 import Html.Events exposing (onClick)
 import Json.Encode
-import Layout exposing (Layout)
-import Semantic exposing (H2, P, Section)
+import Layout exposing (..)
+import Semantic exposing (..)
 import Style exposing (Styling)
+
+
+{- Step 0: Suppose we have the following model for a blog. -}
+
+
+type alias Model =
+    List Post
+
+
+type alias Post =
+    { id : Int
+    , title : String
+    , body : String
+    }
+
+
+model : Model
+model =
+    [ { id = 1, title = "Treatise on Bears", body = "Bears are magnificent!" }
+    , { id = 2, title = "On the subject of Koalas", body = "I prefer bears." }
+    ]
+
 
 
 {- Step 1: Define the structure of your view
 
-   Note that you can only use semantic elements in defining your structure, so no div's and span's.
+   Note that you can only use semantic elements in defining your structure,
+   so no div's and span's.
    This means you're forced to think about the semantics of your view.
    It also ensures you cannot mix semantics with layout.
 
@@ -37,25 +60,16 @@ type alias BlogPost msg =
 -}
 
 
-page : Page Msg
-page =
-    Semantic.section []
-        [ post1, post2 ]
+page : Model -> Page Msg
+page model =
+    Section [] (List.map post model)
 
 
-post1 : BlogPost Msg
-post1 =
-    Semantic.section [ onClick (ToPost 1) ]
-        ( Semantic.h2 [] "First Post"
-        , Semantic.p [] "Let me tell you all about style-elements..."
-        )
-
-
-post2 : BlogPost Msg
-post2 =
-    Semantic.section [ onClick (ToPost 2) ]
-        ( Semantic.h2 [] "Part Two"
-        , Semantic.p [] "In which we continue where part 1 left off."
+post : Post -> BlogPost Msg
+post { id, title, body } =
+    Section [ onClick (ToPost id) ]
+        ( H2 [] title
+        , P [] body
         )
 
 
@@ -68,25 +82,30 @@ post2 =
 -}
 
 
-view : Page msg -> Html msg
-view page =
-    Layout.section (Layout.col layoutPost) page
-        |> Layout.view
+layout : Page msg -> Layout msg
+layout page =
+    section (col layoutPost) page
 
 
 layoutPost : BlogPost msg -> Layout msg
 layoutPost post =
-    post
-        |> Layout.section (Layout.col2 (Layout.h2 Layout.text) (Layout.p Layout.text))
+    section
+        (col2 (h2 text) (p text))
+        post
+
+
+view : Model -> Html Msg
+view =
+    page >> layout >> html
 
 
 
 {- Step 4: Define styling for your elements
 
-   Note that we reuse our previously defined type aliases for part of the page, no classnames necessary.
-   The phantom `Styling` type will ensure the tree of styles we create matches the page structure.
-
-   To ensure we only do styling here and no layouts, we might create a lib that exposes a subset of elm-css.
+   Note that we reuse our previously defined type aliases for part of the page,
+   no classnames necessary.
+   The phantom `Styling` type will ensure the tree of styles we create matches
+   the page structure.
 
    If the page type above breaks the styling should break.
 -}
@@ -113,7 +132,7 @@ css =
 main : Html Msg
 main =
     Html.div []
-        [ view page
+        [ view model
         , Html.node "style"
             [ Attr.property "textContent" (Json.Encode.string css)
             , Attr.property "type" (Json.Encode.string "text/css")

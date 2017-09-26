@@ -1,11 +1,11 @@
-module Layout exposing (Layout, col, col2, h1, h2, p, section, text, view)
+module Layout exposing (Layout, col, col2, h1, h2, html, p, section, text)
 
 {-| The functions in this module can be used to define how a page type should be layed out on the page.
 -}
 
 import Html exposing (Html)
 import Html.Attributes as Attr
-import Semantic.Internal as Semantic exposing (Attrs)
+import Semantic exposing (Attrs)
 
 
 {-| The Layout type is an intermediate representation from the layout that then gets rendered into Html.
@@ -74,14 +74,14 @@ col layoutRow rows =
     Column (List.map layoutRow rows)
 
 
-view : Layout msg -> Html msg
-view layout =
+html : Layout msg -> Html msg
+html layout =
     case layout of
         TextNode text ->
             Html.text text
 
         Wrapper element attrs child ->
-            nodeFor element attrs [ view child ]
+            nodeFor element attrs [ html child ]
 
         Column children ->
             Html.div
@@ -90,7 +90,7 @@ view layout =
                     , ( "flex-direction", "column" )
                     ]
                 ]
-                (List.map view children)
+                (List.map html children)
 
 
 nodeFor : Element -> (Attrs msg -> List (Html msg) -> Html msg)

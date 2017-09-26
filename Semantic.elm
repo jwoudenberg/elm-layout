@@ -1,6 +1,6 @@
-module Semantic exposing (H1, H2, P, Section, h1, h2, p, section)
+module Semantic exposing (..)
 
-import Semantic.Internal as Internal
+import Html exposing (Attribute, Html)
 
 
 {- Element types.
@@ -9,37 +9,21 @@ import Semantic.Internal as Internal
 -}
 
 
-type alias H1 child msg =
-    Internal.H1 child msg
+type alias Attrs msg =
+    List (Attribute msg)
 
 
-type alias H2 child msg =
-    Internal.H2 child msg
+type H1 child msg
+    = H1 (Attrs msg) child
 
 
-type alias Section child msg =
-    Internal.Section child msg
+type H2 child msg
+    = H2 (Attrs msg) child
 
 
-type alias P child msg =
-    Internal.P child msg
+type Section child msg
+    = Section (Attrs msg) child
 
 
-h1 : Internal.Attrs msg -> child -> H1 child msg
-h1 =
-    Internal.H1
-
-
-h2 : Internal.Attrs msg -> child -> H2 child msg
-h2 =
-    Internal.H2
-
-
-section : Internal.Attrs msg -> child -> Section child msg
-section =
-    Internal.Section
-
-
-p : Internal.Attrs msg -> child -> P child msg
-p =
-    Internal.P
+type P child msg
+    = P (Attrs msg) child
