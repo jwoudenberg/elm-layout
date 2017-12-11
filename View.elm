@@ -1,0 +1,304 @@
+module View exposing (..)
+
+import Html exposing (Html)
+import Html.Events
+
+
+-- # Elements
+-- This is a type level API for Html documents.
+-- Use the standard types defined here or create your own.
+
+
+type H1 child
+    = H1Type Never
+
+
+type H2 child
+    = H2Type Never
+
+
+type Section child
+    = SectionType Never
+
+
+type P child
+    = PType Never
+
+
+type OnClick msg child
+    = OnClickType Never
+
+
+type OneOf child1 child2
+    = OneOfType Never
+
+
+
+-- # Single type representation
+-- This is meant for creating view functions.
+-- 1. A phantom type ensures the View corresponds to the page type.
+-- 2. Customize the `SubView` type with your own stuff.
+-- 3. We don't render directly into Html to support different interpreters:
+--    - Elm-css uses a different Html type.
+--    - A view test might wish to interpret the view in a different way.
+--    - Certain optimizations (like collapsing unnecessary containers) are only
+--      possible if we can introspect our page structure.
+
+
+type View tipe custom msg
+    = View (SubView custom msg)
+
+
+type SubView custom msg
+    = H1 (SubView custom msg)
+    | H2 (SubView custom msg)
+    | Section (SubView custom msg)
+    | P (SubView custom msg)
+    | Text String
+    | List (List (SubView custom msg))
+    | OnClick msg (SubView custom msg)
+    | Custom custom (SubView custom msg)
+
+
+toSubView : View tipe custom msg -> SubView custom msg
+toSubView (View subView) =
+    subView
+
+
+h1 : View tipe custom msg -> View (H1 tipe) custom msg
+h1 child =
+    View <| H1 (toSubView child)
+
+
+h2 : View tipe custom msg -> View (H2 tipe) custom msg
+h2 child =
+    View <| H2 (toSubView child)
+
+
+section : View tipe custom msg -> View (Section tipe) custom msg
+section child =
+    View <| H2 (toSubView child)
+
+
+p : View tipe custom msg -> View (P tipe) custom msg
+p child =
+    View <| P (toSubView child)
+
+
+onClick : msg -> View tipe custom msg -> View (OnClick msg tipe) custom msg
+onClick msg child =
+    View <| OnClick msg (toSubView child)
+
+
+text : String -> View String custom msg
+text text =
+    View <| Text text
+
+
+just : Maybe a -> View tipe1 custom msg -> (a -> View tipe2 custom msg) -> View (OneOf tipe1 tipe2) custom msg
+just maybe (View first) second =
+    case maybe of
+        Nothing ->
+            View first
+
+        Just x ->
+            let
+                (View sub) =
+                    second x
+            in
+            View sub
+
+
+list : List (View tipe custom msg) -> View (List tipe) custom msg
+list xs =
+    View <| List (List.map toSubView xs)
+
+
+tuple2 : View tipe1 custom msg -> View tipe2 custom msg -> View ( tipe1, tipe2 ) custom msg
+tuple2 child1 child2 =
+    View <| List [ toSubView child1, toSubView child2 ]
+
+
+{-| Useful during development, to get unimplemented parts of view functions compiling.
+-}
+debug : View tipe custom msg
+debug =
+    View <| Text "Debugging value. Remove me!"
+
+
+map : (msgA -> msgB) -> View tipe custom msgA -> View tipe custom msgB
+map fn (View subView) =
+    View (mapSubView fn subView)
+
+
+mapSubView : (msgA -> msgB) -> SubView custom msgA -> SubView custom msgB
+mapSubView fn subView =
+    case subView of
+        H1 child ->
+            H1 (mapSubView fn child)
+
+        H2 child ->
+            H2 (mapSubView fn child)
+
+        Section child ->
+            Section (mapSubView fn child)
+
+        P child ->
+            P (mapSubView fn child)
+
+        Text text ->
+            Text text
+
+        List children ->
+            List (List.map (mapSubView fn) children)
+
+        OnClick msg child ->
+            OnClick (fn msg) (mapSubView fn child)
+
+        Custom custom child ->
+            Custom custom (mapSubView fn child)
+
+
+
+-- # View generation
+-- One example of a view interpreter, this one producing plain Html.
+
+
+mkView : (custom -> Html msg -> Html msg) -> View tipe custom msg -> Html msg
+mkView viewCustom (View subView) =
+    mkSubView viewCustom [] subView
+
+
+mkSubView : (custom -> Html msg -> Html msg) -> List (Html.Attribute msg) -> SubView custom msg -> Html msg
+mkSubView viewCustom attrs subView =
+    case subView of
+        H1 child ->
+            Html.h1 attrs (List.map (mkSubView viewCustom []) (toChildren child))
+
+        H2 child ->
+            Html.h2 attrs (List.map (mkSubView viewCustom []) (toChildren child))
+
+        Section child ->
+            Html.section attrs (List.map (mkSubView viewCustom []) (toChildren child))
+
+        P child ->
+            Html.p attrs (List.map (mkSubView viewCustom []) (toChildren child))
+
+        Text text ->
+            Html.text text
+
+        List children ->
+            Html.div attrs (List.map (mkSubView viewCustom []) children)
+
+        OnClick msg child ->
+            mkSubView viewCustom [ Html.Events.onClick msg ] child
+
+        Custom custom child ->
+            viewCustom custom (mkSubView viewCustom attrs child)
+
+
+toChildren : SubView custom msg -> List (SubView custom msg)
+toChildren subView =
+    case subView of
+        H1 _ ->
+            [ subView ]
+
+        H2 _ ->
+            [ subView ]
+
+        Section _ ->
+            [ subView ]
+
+        P _ ->
+            [ subView ]
+
+        Text _ ->
+            [ subView ]
+
+        List children ->
+            children
+
+        OnClick _ _ ->
+            [ subView ]
+
+        Custom _ _ ->
+            [ subView ]
+
+
+
+-- # Example of a view funtion built this way.
+
+
+type alias Page =
+    ( OnClick Msg (H1 String), OneOf ListPosts SinglePost )
+
+
+type alias ListPosts =
+    List (Section SinglePost)
+
+
+type alias SinglePost =
+    ( OnClick Msg (H2 String), PostContent )
+
+
+type alias PostContent =
+    P String
+
+
+type Msg
+    = ToPost Int
+    | ToHome
+
+
+type alias Model =
+    { posts : List Post
+    , currentPost : Maybe Int
+    }
+
+
+type alias Post =
+    { id : Int
+    , title : String
+    , content : String
+    }
+
+
+model : Model
+model =
+    { posts = [ { id = 1, title = "Bears", content = "A treatise on bears." } ]
+    , currentPost = Just 1
+    }
+
+
+view : Model -> View Page custom Msg
+view model =
+    let
+        currentPost : Maybe Post
+        currentPost =
+            model.posts
+                |> List.filter (\p -> Just p.id == model.currentPost)
+                |> List.head
+    in
+    tuple2
+        viewHeader
+        (just currentPost (viewHome model.posts) viewPost)
+
+
+viewHeader : View (OnClick Msg (H1 String)) custom Msg
+viewHeader =
+    onClick ToHome (h1 (text "My Blog!"))
+
+
+viewHome : List Post -> View ListPosts custom Msg
+viewHome posts =
+    list <| List.map (section << viewPost) posts
+
+
+viewPost : Post -> View SinglePost custom Msg
+viewPost post =
+    tuple2 (viewTitle post) (p <| text post.content)
+
+
+viewTitle : Post -> View (OnClick Msg (H2 String)) custom Msg
+viewTitle post =
+    onClick (ToPost post.id) (h2 <| text post.title)
