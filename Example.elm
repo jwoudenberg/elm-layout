@@ -4,7 +4,11 @@ import View exposing (..)
 
 
 type alias Page =
-    ( On Click Msg (H1 String), { home : ListPosts, post : SinglePost } )
+    ( SiteTitle, { home : ListPosts, post : SinglePost } )
+
+
+type alias SiteTitle =
+    On Click Msg (H1 String)
 
 
 type alias ListPosts =
@@ -12,7 +16,11 @@ type alias ListPosts =
 
 
 type alias SinglePost =
-    ( On Click Msg (H2 String), PostContent )
+    ( PostTitle, PostContent )
+
+
+type alias PostTitle =
+    On Click Msg (H2 String)
 
 
 type alias PostContent =
@@ -64,7 +72,7 @@ view model =
         )
 
 
-viewHeader : View (On Click Msg (H1 String)) custom Msg
+viewHeader : View SiteTitle custom Msg
 viewHeader =
     onClick ToHome (h1 (text "My Blog!"))
 
@@ -79,6 +87,6 @@ viewPost post =
     tuple2 (viewTitle post) (p <| text post.content)
 
 
-viewTitle : Post -> View (On Click Msg (H2 String)) custom Msg
+viewTitle : Post -> View PostTitle custom Msg
 viewTitle post =
     onClick (ToPost post.id) (h2 <| text post.title)
