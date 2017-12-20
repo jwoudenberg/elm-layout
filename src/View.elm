@@ -1,7 +1,8 @@
-module View exposing (H1, H2, OnClick, P, Section, View, debug, h1, h2, list, map, match, onClick, p, section, text, toHtml, tuple2)
+module View exposing (Click, H1, H2, On, P, Section, View, debug, h1, h2, list, map, match, on, onClick, p, section, text, toHtml, tuple2)
 
 import Html exposing (Html)
 import Html.Events
+import Json.Decode exposing (Decoder)
 
 
 -- # Elements
@@ -25,8 +26,12 @@ type P child
     = PType Never
 
 
-type OnClick msg child
-    = OnClickType Never
+type On event msg child
+    = OnType Never
+
+
+type Click
+    = Click Never
 
 
 
@@ -52,7 +57,7 @@ type SubView custom msg
     | P (SubView custom msg)
     | Text String
     | List (List (SubView custom msg))
-    | OnClick msg (SubView custom msg)
+    | On String (Decoder msg) (SubView custom msg)
     | Custom custom (SubView custom msg)
 
 
@@ -81,9 +86,14 @@ p child =
     View <| P (toSubView child)
 
 
-onClick : msg -> View tipe custom msg -> View (OnClick msg tipe) custom msg
+onClick : msg -> View tipe custom msg -> View (On Click msg tipe) custom msg
 onClick msg child =
-    View <| OnClick msg (toSubView child)
+    View <| On "click" (Json.Decode.succeed msg) (toSubView child)
+
+
+on : String -> Decoder msg -> View tipe custom msg -> View (On event msg tipe) custom msg
+on event msgDecoder child =
+    View <| On event msgDecoder (toSubView child)
 
 
 text : String -> View String custom msg
@@ -139,8 +149,8 @@ mapSubView fn subView =
         List children ->
             List (List.map (mapSubView fn) children)
 
-        OnClick msg child ->
-            OnClick (fn msg) (mapSubView fn child)
+        On event msgDecoder child ->
+            On event (Json.Decode.map fn msgDecoder) (mapSubView fn child)
 
         Custom custom child ->
             Custom custom (mapSubView fn child)
@@ -177,8 +187,8 @@ mkSubView viewCustom attrs subView =
         List children ->
             Html.div attrs (List.map (mkSubView viewCustom []) children)
 
-        OnClick msg child ->
-            mkSubView viewCustom [ Html.Events.onClick msg ] child
+        On event msgDecoder child ->
+            mkSubView viewCustom [ Html.Events.on event msgDecoder ] child
 
         Custom custom child ->
             viewCustom custom (mkSubView viewCustom attrs child)
@@ -205,7 +215,7 @@ toChildren subView =
         List children ->
             children
 
-        OnClick _ _ ->
+        On _ _ _ ->
             [ subView ]
 
         Custom _ _ ->
