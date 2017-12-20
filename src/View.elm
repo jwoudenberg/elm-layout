@@ -1,4 +1,4 @@
-module View exposing (Click, H1, H2, On, P, Section, View, debug, h1, h2, list, map, match, on, onClick, p, section, text, toHtml, tuple2)
+module View exposing (Click, CustomView, H1, H2, On, P, Section, View, debug, h1, h2, list, map, match, on, onClick, p, section, text, toHtml, tuple2)
 
 import Html exposing (Html)
 import Html.Events
@@ -46,8 +46,15 @@ type Click
 --      possible if we can introspect our page structure.
 
 
-type View tipe custom msg
+type CustomView tipe custom msg
     = View (SubView custom msg)
+
+
+{-| A View type that doesn't allow customizations. Nice to use when starting
+out with this library.
+-}
+type alias View tipe msg =
+    CustomView tipe () msg
 
 
 type SubView custom msg
@@ -61,69 +68,69 @@ type SubView custom msg
     | Custom custom (SubView custom msg)
 
 
-toSubView : View tipe custom msg -> SubView custom msg
+toSubView : CustomView tipe custom msg -> SubView custom msg
 toSubView (View subView) =
     subView
 
 
-h1 : View tipe custom msg -> View (H1 tipe) custom msg
+h1 : CustomView tipe custom msg -> CustomView (H1 tipe) custom msg
 h1 child =
     View <| H1 (toSubView child)
 
 
-h2 : View tipe custom msg -> View (H2 tipe) custom msg
+h2 : CustomView tipe custom msg -> CustomView (H2 tipe) custom msg
 h2 child =
     View <| H2 (toSubView child)
 
 
-section : View tipe custom msg -> View (Section tipe) custom msg
+section : CustomView tipe custom msg -> CustomView (Section tipe) custom msg
 section child =
     View <| H2 (toSubView child)
 
 
-p : View tipe custom msg -> View (P tipe) custom msg
+p : CustomView tipe custom msg -> CustomView (P tipe) custom msg
 p child =
     View <| P (toSubView child)
 
 
-onClick : msg -> View tipe custom msg -> View (On Click msg tipe) custom msg
+onClick : msg -> CustomView tipe custom msg -> CustomView (On Click msg tipe) custom msg
 onClick msg child =
     on "click" (Json.Decode.succeed msg) child
 
 
-on : String -> Decoder msg -> View tipe custom msg -> View (On event msg tipe) custom msg
+on : String -> Decoder msg -> CustomView tipe custom msg -> CustomView (On event msg tipe) custom msg
 on event msgDecoder child =
     View <| On event msgDecoder (toSubView child)
 
 
-text : String -> View String custom msg
+text : String -> CustomView String custom msg
 text text =
     View <| Text text
 
 
-list : List (View tipe custom msg) -> View (List tipe) custom msg
+list : List (CustomView tipe custom msg) -> CustomView (List tipe) custom msg
 list xs =
     View <| List (List.map toSubView xs)
 
 
-match : (oneOfTipe -> tipe) -> View tipe custom msg -> View oneOfTipe custom msg
+match : (oneOfTipe -> tipe) -> CustomView tipe custom msg -> CustomView oneOfTipe custom msg
 match _ child =
     View <| toSubView child
 
 
-tuple2 : View tipe1 custom msg -> View tipe2 custom msg -> View ( tipe1, tipe2 ) custom msg
+tuple2 : CustomView tipe1 custom msg -> CustomView tipe2 custom msg -> CustomView ( tipe1, tipe2 ) custom msg
 tuple2 child1 child2 =
     View <| List [ toSubView child1, toSubView child2 ]
 
 
 {-| Useful during development, to get unimplemented parts of view functions compiling.
 -}
-debug : View tipe custom msg
+debug : CustomView tipe custom msg
 debug =
     View <| Text "Debugging value. Remove me!"
 
 
-map : (msgA -> msgB) -> View tipe custom msgA -> View tipe custom msgB
+map : (msgA -> msgB) -> CustomView tipe custom msgA -> CustomView tipe custom msgB
 map fn (View subView) =
     View (mapSubView fn subView)
 
@@ -161,7 +168,7 @@ mapSubView fn subView =
 -- One example of a view interpreter, this one producing plain Html.
 
 
-toHtml : (custom -> Html msg -> Html msg) -> View tipe custom msg -> Html msg
+toHtml : (custom -> Html msg -> Html msg) -> CustomView tipe custom msg -> Html msg
 toHtml viewCustom (View subView) =
     mkSubView viewCustom [] subView
 

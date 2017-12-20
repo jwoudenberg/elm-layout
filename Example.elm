@@ -52,7 +52,7 @@ model =
     }
 
 
-view : Model -> View Page custom Msg
+view : Model -> View Page Msg
 view model =
     let
         currentPost : Maybe Post
@@ -72,21 +72,21 @@ view model =
         )
 
 
-viewHeader : View SiteTitle custom Msg
+viewHeader : View SiteTitle Msg
 viewHeader =
     onClick ToHome (h1 (text "My Blog!"))
 
 
-viewHome : List Post -> View ListPosts custom Msg
+viewHome : List Post -> View ListPosts Msg
 viewHome posts =
     list <| List.map (section << viewPost) posts
 
 
-viewPost : Post -> View SinglePost custom Msg
+viewPost : Post -> View SinglePost Msg
 viewPost post =
     tuple2 (viewTitle post) (p <| text post.content)
 
 
-viewTitle : Post -> View PostTitle custom Msg
+viewTitle : Post -> View PostTitle Msg
 viewTitle post =
     onClick (ToPost post.id) (h2 <| text post.title)
