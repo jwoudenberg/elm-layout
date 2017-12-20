@@ -1,4 +1,4 @@
-module View exposing (H1, H2, OnClick, OneOf, P, Section, View, debug, h1, h2, just, list, map, onClick, p, section, text, toHtml, tuple2)
+module View exposing (H1, H2, OnClick, OneOf, OneOfFour, OneOfThree, OneOfTwo, P, Section, View, debug, h1, h2, list, map, maybe, onClick, opt1, opt2, opt3, opt4, p, section, text, toHtml, tuple2)
 
 import Html exposing (Html)
 import Html.Events
@@ -29,8 +29,20 @@ type OnClick msg child
     = OnClickType Never
 
 
-type OneOf child1 child2
+type OneOf children
     = OneOfType Never
+
+
+type alias OneOfTwo tipe1 tipe2 =
+    OneOf { opt1 : tipe1, opt2 : tipe2 }
+
+
+type alias OneOfThree tipe1 tipe2 tipe3 =
+    OneOf { opt1 : tipe1, opt2 : tipe2, opt3 : tipe3 }
+
+
+type alias OneOfFour tipe1 tipe2 tipe3 tipe4 =
+    OneOf { opt1 : tipe1, opt2 : tipe2, opt3 : tipe3, opt4 : tipe4 }
 
 
 
@@ -95,8 +107,8 @@ text text =
     View <| Text text
 
 
-just : Maybe a -> View tipe1 custom msg -> (a -> View tipe2 custom msg) -> View (OneOf tipe1 tipe2) custom msg
-just maybe (View first) second =
+maybe : Maybe a -> View tipe1 custom msg -> (a -> View tipe2 custom msg) -> View (OneOfTwo tipe1 tipe2) custom msg
+maybe maybe (View first) second =
     case maybe of
         Nothing ->
             View first
@@ -112,6 +124,26 @@ just maybe (View first) second =
 list : List (View tipe custom msg) -> View (List tipe) custom msg
 list xs =
     View <| List (List.map toSubView xs)
+
+
+opt1 : View tipe custom msg -> View (OneOf { r | opt1 : tipe }) custom msg
+opt1 child =
+    View <| toSubView child
+
+
+opt2 : View tipe custom msg -> View (OneOf { r | opt2 : tipe }) custom msg
+opt2 child =
+    View <| toSubView child
+
+
+opt3 : View tipe custom msg -> View (OneOf { r | opt3 : tipe }) custom msg
+opt3 child =
+    View <| toSubView child
+
+
+opt4 : View tipe custom msg -> View (OneOf { r | opt4 : tipe }) custom msg
+opt4 child =
+    View <| toSubView child
 
 
 tuple2 : View tipe1 custom msg -> View tipe2 custom msg -> View ( tipe1, tipe2 ) custom msg

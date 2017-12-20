@@ -4,7 +4,7 @@ import View exposing (..)
 
 
 type alias Page =
-    ( OnClick Msg (H1 String), OneOf ListPosts SinglePost )
+    ( OnClick Msg (H1 String), OneOfTwo ListPosts SinglePost )
 
 
 type alias ListPosts =
@@ -55,7 +55,13 @@ view model =
     in
     tuple2
         viewHeader
-        (just currentPost (viewHome model.posts) viewPost)
+        (case currentPost of
+            Nothing ->
+                opt1 <| viewHome model.posts
+
+            Just post ->
+                opt2 <| viewPost post
+        )
 
 
 viewHeader : View (OnClick Msg (H1 String)) custom Msg
