@@ -88,7 +88,7 @@ p child =
 
 onClick : msg -> View tipe custom msg -> View (On Click msg tipe) custom msg
 onClick msg child =
-    View <| On "click" (Json.Decode.succeed msg) (toSubView child)
+    on "click" (Json.Decode.succeed msg) child
 
 
 on : String -> Decoder msg -> View tipe custom msg -> View (On event msg tipe) custom msg
