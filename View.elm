@@ -1,4 +1,4 @@
-module View exposing (..)
+module View exposing (H1, H2, OnClick, OneOf, P, Section, View, debug, h1, h2, just, list, map, onClick, p, section, text, toHtml, tuple2)
 
 import Html exposing (Html)
 import Html.Events
@@ -164,8 +164,8 @@ mapSubView fn subView =
 -- One example of a view interpreter, this one producing plain Html.
 
 
-mkView : (custom -> Html msg -> Html msg) -> View tipe custom msg -> Html msg
-mkView viewCustom (View subView) =
+toHtml : (custom -> Html msg -> Html msg) -> View tipe custom msg -> Html msg
+toHtml viewCustom (View subView) =
     mkSubView viewCustom [] subView
 
 
@@ -223,82 +223,3 @@ toChildren subView =
 
         Custom _ _ ->
             [ subView ]
-
-
-
--- # Example of a view funtion built this way.
-
-
-type alias Page =
-    ( OnClick Msg (H1 String), OneOf ListPosts SinglePost )
-
-
-type alias ListPosts =
-    List (Section SinglePost)
-
-
-type alias SinglePost =
-    ( OnClick Msg (H2 String), PostContent )
-
-
-type alias PostContent =
-    P String
-
-
-type Msg
-    = ToPost Int
-    | ToHome
-
-
-type alias Model =
-    { posts : List Post
-    , currentPost : Maybe Int
-    }
-
-
-type alias Post =
-    { id : Int
-    , title : String
-    , content : String
-    }
-
-
-model : Model
-model =
-    { posts = [ { id = 1, title = "Bears", content = "A treatise on bears." } ]
-    , currentPost = Just 1
-    }
-
-
-view : Model -> View Page custom Msg
-view model =
-    let
-        currentPost : Maybe Post
-        currentPost =
-            model.posts
-                |> List.filter (\p -> Just p.id == model.currentPost)
-                |> List.head
-    in
-    tuple2
-        viewHeader
-        (just currentPost (viewHome model.posts) viewPost)
-
-
-viewHeader : View (OnClick Msg (H1 String)) custom Msg
-viewHeader =
-    onClick ToHome (h1 (text "My Blog!"))
-
-
-viewHome : List Post -> View ListPosts custom Msg
-viewHome posts =
-    list <| List.map (section << viewPost) posts
-
-
-viewPost : Post -> View SinglePost custom Msg
-viewPost post =
-    tuple2 (viewTitle post) (p <| text post.content)
-
-
-viewTitle : Post -> View (OnClick Msg (H2 String)) custom Msg
-viewTitle post =
-    onClick (ToPost post.id) (h2 <| text post.title)
