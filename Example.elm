@@ -4,13 +4,44 @@ import Html
 import View exposing (..)
 
 
+type alias Model =
+    { posts : List Post
+    , currentPost : Maybe Int
+    }
+
+
+type Msg
+    = ToPost Int
+    | ToHome
+
+
 main : Program Never Model Msg
 main =
     Html.beginnerProgram
-        { model = model
+        { model = init
         , view = view >> View.toHtml (\_ -> identity)
-        , update = \msg model -> model
+        , update = update
         }
+
+
+update : Msg -> Model -> Model
+update msg model =
+    case msg of
+        ToPost id ->
+            { model | currentPost = Just id }
+
+        ToHome ->
+            { model | currentPost = Nothing }
+
+
+init : Model
+init =
+    { posts =
+        [ { id = 1, title = "Bears", content = "A treatise on bears." }
+        , { id = 2, title = "Sharks", content = "Not nearly as awesome as bears." }
+        ]
+    , currentPost = Nothing
+    }
 
 
 type alias Page =
@@ -37,28 +68,10 @@ type alias PostContent =
     P String
 
 
-type Msg
-    = ToPost Int
-    | ToHome
-
-
-type alias Model =
-    { posts : List Post
-    , currentPost : Maybe Int
-    }
-
-
 type alias Post =
     { id : Int
     , title : String
     , content : String
-    }
-
-
-model : Model
-model =
-    { posts = [ { id = 1, title = "Bears", content = "A treatise on bears." } ]
-    , currentPost = Just 1
     }
 
 
