@@ -1,6 +1,16 @@
 module Example exposing (..)
 
+import Html
 import View exposing (..)
+
+
+main : Program Never Model Msg
+main =
+    Html.beginnerProgram
+        { model = model
+        , view = view >> View.toHtml (\_ -> identity)
+        , update = \msg model -> model
+        }
 
 
 type alias Page =
