@@ -85,7 +85,7 @@ h2 child =
 
 section : CustomView tipe custom msg -> CustomView (Section tipe) custom msg
 section child =
-    View <| H2 (toSubView child)
+    View <| Section (toSubView child)
 
 
 p : CustomView tipe custom msg -> CustomView (P tipe) custom msg
