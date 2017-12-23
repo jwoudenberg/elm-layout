@@ -1,4 +1,4 @@
-module View exposing (Click, CustomView, H1, H2, On, P, Section, View, debug, h1, h2, list, map, match, on, onClick, p, section, text, toHtml, tuple2)
+module View exposing (Click, CustomView, H1, H2, On, P, Section, View, debug, h1, h2, list, map, match, on, onClick, p, section, text, toHtml, toHtmlSimple, tuple2)
 
 import Html exposing (Html)
 import Html.Events
@@ -171,6 +171,11 @@ mapSubView fn subView =
 toHtml : (custom -> Html msg -> Html msg) -> CustomView tipe custom msg -> Html msg
 toHtml viewCustom (View subView) =
     mkSubView viewCustom [] subView
+
+
+toHtmlSimple : CustomView tipe custom msg -> Html msg
+toHtmlSimple =
+    toHtml (always identity)
 
 
 mkSubView : (custom -> Html msg -> Html msg) -> List (Html.Attribute msg) -> SubView custom msg -> Html msg
