@@ -1,4 +1,4 @@
-module View exposing (Click, CustomView, H1, H2, On, P, Section, View, debug, h1, h2, list, map, match, on, onClick, p, section, text, toHtml, toHtmlSimple, tuple2)
+module View exposing (Click, CustomView, H1, H2, On, P, Section, View, debug, h1, h2, list, map, match, name, on, onClick, p, section, text, toHtml, toHtmlSimple, tuple2)
 
 import Html exposing (Html)
 import Html.Events
@@ -133,6 +133,30 @@ debug =
 map : (msgA -> msgB) -> CustomView tipe custom msgA -> CustomView tipe custom msgB
 map fn (View subView) =
     View (mapSubView fn subView)
+
+
+{-| Name a view type to have that name appear in compiler errors rather than a
+tree of html types.
+
+Suppose your social network app contains a chatbox widget. Ordinarily view
+compilation errors of parts of your page that include the widget would contain
+the tree-like Html type describing the widget. Using `name` we can make it that
+we only see the widget name instead.
+
+    type ChatBoxWidget
+        = ChatBoxWidget ( H2 String, List Message )
+
+    view : Model -> View ChatBoxWidget custom msg
+    view model =
+        name ChatBoxWidget
+            ( h2 (text "Chatbox")
+            , list (List.map viewMessage model.messages)
+            )
+
+-}
+name : (a -> b) -> CustomView a custom msg -> CustomView b custom msg
+name _ (View subView) =
+    View subView
 
 
 mapSubView : (msgA -> msgB) -> SubView custom msgA -> SubView custom msgB

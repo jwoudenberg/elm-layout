@@ -56,8 +56,8 @@ type alias ListPosts =
     List (Section SinglePost)
 
 
-type alias SinglePost =
-    ( PostTitle, PostContent )
+type SinglePost
+    = SinglePost ( PostTitle, PostContent )
 
 
 type alias PostTitle =
@@ -108,6 +108,7 @@ viewHome posts =
 viewPost : Post -> View SinglePost Msg
 viewPost post =
     tuple2 (viewTitle post) (p <| text post.content)
+        |> name SinglePost
 
 
 viewTitle : Post -> View PostTitle Msg
