@@ -18,6 +18,22 @@ type H2 child
     = H2Type Never
 
 
+type H3 child
+    = H3Type Never
+
+
+type H4 child
+    = H4Type Never
+
+
+type H5 child
+    = H5Type Never
+
+
+type H6 child
+    = H6Type Never
+
+
 type Section child
     = SectionType Never
 
@@ -60,6 +76,10 @@ type alias View tipe msg =
 type SubView custom msg
     = H1 (SubView custom msg)
     | H2 (SubView custom msg)
+    | H3 (SubView custom msg)
+    | H4 (SubView custom msg)
+    | H5 (SubView custom msg)
+    | H6 (SubView custom msg)
     | Section (SubView custom msg)
     | P (SubView custom msg)
     | Text String
@@ -81,6 +101,11 @@ h1 child =
 h2 : CustomView tipe custom msg -> CustomView (H2 tipe) custom msg
 h2 child =
     View <| H2 (toSubView child)
+
+
+h3 : CustomView tipe custom msg -> CustomView (H3 tipe) custom msg
+h3 child =
+    View <| H3 (toSubView child)
 
 
 section : CustomView tipe custom msg -> CustomView (Section tipe) custom msg
@@ -168,6 +193,18 @@ mapSubView fn subView =
         H2 child ->
             H2 (mapSubView fn child)
 
+        H3 child ->
+            H3 (mapSubView fn child)
+
+        H4 child ->
+            H4 (mapSubView fn child)
+
+        H5 child ->
+            H5 (mapSubView fn child)
+
+        H6 child ->
+            H6 (mapSubView fn child)
+
         Section child ->
             Section (mapSubView fn child)
 
@@ -211,6 +248,18 @@ mkSubView viewCustom attrs subView =
         H2 child ->
             Html.h2 attrs (List.map (mkSubView viewCustom []) (toChildren child))
 
+        H3 child ->
+            Html.h3 attrs (List.map (mkSubView viewCustom []) (toChildren child))
+
+        H4 child ->
+            Html.h4 attrs (List.map (mkSubView viewCustom []) (toChildren child))
+
+        H5 child ->
+            Html.h5 attrs (List.map (mkSubView viewCustom []) (toChildren child))
+
+        H6 child ->
+            Html.h6 attrs (List.map (mkSubView viewCustom []) (toChildren child))
+
         Section child ->
             Html.section attrs (List.map (mkSubView viewCustom []) (toChildren child))
 
@@ -237,6 +286,18 @@ toChildren subView =
             [ subView ]
 
         H2 _ ->
+            [ subView ]
+
+        H3 _ ->
+            [ subView ]
+
+        H4 _ ->
+            [ subView ]
+
+        H5 _ ->
+            [ subView ]
+
+        H6 _ ->
             [ subView ]
 
         Section _ ->
