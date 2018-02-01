@@ -1,4 +1,4 @@
-module View exposing (Click, CustomView, H1, H2, On, P, Section, View, debug, h1, h2, list, map, match, name, on, onClick, p, section, text, toHtml, toHtmlSimple, tuple2)
+module View exposing (Click, CustomView, H1, H2, On, P, Section, View, debug, h1, h2, list, map, name, on, onClick, p, section, text, toHtml, toHtmlSimple, tuple2)
 
 import Html exposing (Html)
 import Html.Events
@@ -136,11 +136,6 @@ text text =
 list : List (CustomView tipe custom msg) -> CustomView (List tipe) custom msg
 list xs =
     View <| List (List.map toSubView xs)
-
-
-match : (oneOfTipe -> tipe) -> CustomView tipe custom msg -> CustomView oneOfTipe custom msg
-match _ child =
-    View <| toSubView child
 
 
 tuple2 : CustomView tipe1 custom msg -> CustomView tipe2 custom msg -> CustomView ( tipe1, tipe2 ) custom msg

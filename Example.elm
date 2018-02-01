@@ -45,7 +45,12 @@ init =
 
 
 type alias Page =
-    ( SiteTitle, { home : ListPosts, post : SinglePost } )
+    ( SiteTitle, PageType )
+
+
+type PageType
+    = HomePage ListPosts
+    | PostPage SinglePost
 
 
 type alias SiteTitle =
@@ -88,10 +93,10 @@ view model =
         viewHeader
         (case currentPost of
             Nothing ->
-                match .home <| viewHome model.posts
+                name HomePage <| viewHome model.posts
 
             Just post ->
-                match .post <| viewPost post
+                name PostPage <| viewPost post
         )
 
 
@@ -114,3 +119,12 @@ viewPost post =
 viewTitle : Post -> View PostTitle Msg
 viewTitle post =
     onClick (ToPost post.id) (h2 <| text post.title)
+
+
+type MyWidget
+    = MyWidget
+
+
+myWidget : Html.Html msg
+myWidget =
+    Html.text "Hello World!"
