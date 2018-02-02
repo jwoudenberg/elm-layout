@@ -1,3 +1,3 @@
-# elm-layout
+# html-typed
 
-These are some ideas for an alternative style-elements API.
+Typed view functions.
