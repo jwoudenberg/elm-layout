@@ -1,4 +1,4 @@
-module Html.Typed exposing (Click, H1, H2, Html, On, P, Section, add, debug, h1, h2, list, map, name, on, onClick, p, section, text, toRaw, within)
+module Html.Typed exposing (Click, H1, H2, Html, On, P, Section, add, debug, fromRaw, h1, h2, list, map, name, on, onClick, p, section, text, toRaw, within)
 
 import Html
 import Html.Events
@@ -77,6 +77,7 @@ type SubHtml msg
     | Text String
     | List (List (SubHtml msg))
     | On String (Decoder msg) (SubHtml msg)
+    | Raw (Html.Html msg)
 
 
 toSubHtml : Html tipe msg -> SubHtml msg
@@ -223,6 +224,9 @@ mapSubHtml fn subHtml =
         On event msgDecoder child ->
             On event (Json.Decode.map fn msgDecoder) (mapSubHtml fn child)
 
+        Raw html ->
+            Raw (Html.map fn html)
+
 
 
 -- # Html generation
@@ -232,6 +236,11 @@ mapSubHtml fn subHtml =
 toRaw : Html tipe msg -> Html.Html msg
 toRaw (Html subHtml) =
     mkSubHtml [] subHtml
+
+
+fromRaw : Html.Html msg -> Html tipe msg
+fromRaw html =
+    Html <| Raw html
 
 
 mkSubHtml : List (Html.Attribute msg) -> SubHtml msg -> Html.Html msg
@@ -270,6 +279,9 @@ mkSubHtml attrs subHtml =
         On event msgDecoder child ->
             mkSubHtml [ Html.Events.on event msgDecoder ] child
 
+        Raw html ->
+            html
+
 
 toChildren : SubHtml msg -> List (SubHtml msg)
 toChildren subHtml =
@@ -306,3 +318,6 @@ toChildren subHtml =
 
         On _ _ _ ->
             [ subHtml ]
+
+        Raw _ ->
+            []
