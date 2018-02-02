@@ -45,24 +45,24 @@ init =
 
 
 type Page
-    = Page SiteTitle PageType
+    = Page Header Body
 
 
-type PageType
-    = HomePage ListPosts
-    | PostPage SinglePost
-
-
-type alias SiteTitle =
+type alias Header =
     On Click Msg (H1 String)
 
 
-type alias ListPosts =
-    List (Section SinglePost)
+type Body
+    = ListPosts (List SinglePost)
+    | SinglePost SinglePost
 
 
-type SinglePost
-    = SinglePost PostTitle PostContent
+type alias SinglePost =
+    Section PostBody
+
+
+type PostBody
+    = PostBody PostTitle PostContent
 
 
 type alias PostTitle =
@@ -94,28 +94,29 @@ view model =
         |> add
             (case currentPost of
                 Nothing ->
-                    name HomePage <| viewHome model.posts
+                    name ListPosts <| viewHome model.posts
 
                 Just post ->
-                    name PostPage <| viewPost post
+                    name SinglePost <| viewPost post
             )
 
 
-viewHeader : Html SiteTitle Msg
+viewHeader : Html Header Msg
 viewHeader =
     onClick ToHome (h1 (text "My Blog!"))
 
 
-viewHome : List Post -> Html ListPosts Msg
+viewHome : List Post -> Html (List SinglePost) Msg
 viewHome posts =
-    list <| List.map (section << viewPost) posts
+    list <| List.map viewPost posts
 
 
 viewPost : Post -> Html SinglePost Msg
 viewPost post =
-    within SinglePost
+    within PostBody
         |> add (viewTitle post)
         |> add (p <| text post.content)
+        |> section
 
 
 viewTitle : Post -> Html PostTitle Msg
