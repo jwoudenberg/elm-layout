@@ -1,4 +1,4 @@
-module View exposing (Click, CustomView, H1, H2, On, P, Section, View, debug, h1, h2, list, map, name, on, onClick, p, section, text, toHtml, toHtmlSimple, tuple2)
+module View exposing (Click, CustomView, H1, H2, On, P, Section, View, add, debug, h1, h2, list, map, name, on, onClick, p, section, text, toHtml, toHtmlSimple, tuple2, within)
 
 import Html exposing (Html)
 import Html.Events
@@ -141,6 +141,28 @@ list xs =
 tuple2 : CustomView tipe1 custom msg -> CustomView tipe2 custom msg -> CustomView ( tipe1, tipe2 ) custom msg
 tuple2 child1 child2 =
     View <| List [ toSubView child1, toSubView child2 ]
+
+
+within : (a -> b) -> CustomView (a -> b) custom msg
+within _ =
+    View <| List []
+
+
+add : CustomView tipe1 custom msg -> CustomView (tipe1 -> tipe2) custom msg -> CustomView tipe2 custom msg
+add child2 child1 =
+    View <|
+        case ( toSubView child1, toSubView child2 ) of
+            ( List xs, List ys ) ->
+                List (xs ++ ys)
+
+            ( List xs, y ) ->
+                List (xs ++ [ y ])
+
+            ( x, List ys ) ->
+                List (x :: ys)
+
+            ( x, y ) ->
+                List [ x, y ]
 
 
 {-| Useful during development, to get unimplemented parts of view functions compiling.

@@ -44,8 +44,8 @@ init =
     }
 
 
-type alias Page =
-    ( SiteTitle, PageType )
+type Page
+    = Page SiteTitle PageType
 
 
 type PageType
@@ -89,15 +89,16 @@ view model =
                 |> List.filter (\p -> Just p.id == model.currentPost)
                 |> List.head
     in
-    tuple2
-        viewHeader
-        (case currentPost of
-            Nothing ->
-                name HomePage <| viewHome model.posts
+    within Page
+        |> add viewHeader
+        |> add
+            (case currentPost of
+                Nothing ->
+                    name HomePage <| viewHome model.posts
 
-            Just post ->
-                name PostPage <| viewPost post
-        )
+                Just post ->
+                    name PostPage <| viewPost post
+            )
 
 
 viewHeader : View SiteTitle Msg
