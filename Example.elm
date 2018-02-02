@@ -1,7 +1,7 @@
 module Example exposing (..)
 
 import Html
-import View exposing (..)
+import Html.Typed exposing (..)
 
 
 type alias Model =
@@ -19,7 +19,7 @@ main : Program Never Model Msg
 main =
     Html.beginnerProgram
         { model = init
-        , view = view >> View.toHtml
+        , view = view >> Html.Typed.toHtml
         , update = update
         }
 
@@ -80,7 +80,7 @@ type alias Post =
     }
 
 
-view : Model -> View Page Msg
+view : Model -> Html Page Msg
 view model =
     let
         currentPost : Maybe Post
@@ -101,23 +101,23 @@ view model =
             )
 
 
-viewHeader : View SiteTitle Msg
+viewHeader : Html SiteTitle Msg
 viewHeader =
     onClick ToHome (h1 (text "My Blog!"))
 
 
-viewHome : List Post -> View ListPosts Msg
+viewHome : List Post -> Html ListPosts Msg
 viewHome posts =
     list <| List.map (section << viewPost) posts
 
 
-viewPost : Post -> View SinglePost Msg
+viewPost : Post -> Html SinglePost Msg
 viewPost post =
     tuple2 (viewTitle post) (p <| text post.content)
         |> name SinglePost
 
 
-viewTitle : Post -> View PostTitle Msg
+viewTitle : Post -> Html PostTitle Msg
 viewTitle post =
     onClick (ToPost post.id) (h2 <| text post.title)
 
