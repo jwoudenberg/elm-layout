@@ -19,7 +19,7 @@ main : Program Never Model Msg
 main =
     Html.beginnerProgram
         { model = init
-        , view = view >> View.toHtmlSimple
+        , view = view >> View.toHtml
         , update = update
         }
 

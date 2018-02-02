@@ -1,6 +1,6 @@
-module View exposing (Click, CustomView, H1, H2, On, P, Section, View, add, debug, h1, h2, list, map, name, on, onClick, p, section, text, toHtml, toHtmlSimple, tuple2, within)
+module View exposing (Click, H1, H2, On, P, Section, View, add, debug, h1, h2, list, map, name, on, onClick, p, section, text, toHtml, tuple2, within)
 
-import Html exposing (Html)
+import Html
 import Html.Events
 import Json.Decode exposing (Decoder)
 
@@ -54,101 +54,92 @@ type Click
 -- # Single type representation
 -- This is meant for creating view functions.
 -- 1. A phantom type ensures the View corresponds to the page type.
--- 2. Customize the `SubView` type with your own stuff.
--- 3. We don't render directly into Html to support different interpreters:
+-- 2. We don't render directly into Html to support different interpreters:
 --    - Elm-css uses a different Html type.
 --    - A view test might wish to interpret the view in a different way.
 --    - Certain optimizations (like collapsing unnecessary containers) are only
 --      possible if we can introspect our page structure.
 
 
-type CustomView tipe custom msg
-    = View (SubView custom msg)
+type View tipe msg
+    = View (SubView msg)
 
 
-{-| A View type that doesn't allow customizations. Nice to use when starting
-out with this library.
--}
-type alias View tipe msg =
-    CustomView tipe () msg
-
-
-type SubView custom msg
-    = H1 (SubView custom msg)
-    | H2 (SubView custom msg)
-    | H3 (SubView custom msg)
-    | H4 (SubView custom msg)
-    | H5 (SubView custom msg)
-    | H6 (SubView custom msg)
-    | Section (SubView custom msg)
-    | P (SubView custom msg)
+type SubView msg
+    = H1 (SubView msg)
+    | H2 (SubView msg)
+    | H3 (SubView msg)
+    | H4 (SubView msg)
+    | H5 (SubView msg)
+    | H6 (SubView msg)
+    | Section (SubView msg)
+    | P (SubView msg)
     | Text String
-    | List (List (SubView custom msg))
-    | On String (Decoder msg) (SubView custom msg)
-    | Custom custom (SubView custom msg)
+    | List (List (SubView msg))
+    | On String (Decoder msg) (SubView msg)
 
 
-toSubView : CustomView tipe custom msg -> SubView custom msg
+toSubView : View tipe msg -> SubView msg
 toSubView (View subView) =
     subView
 
 
-h1 : CustomView tipe custom msg -> CustomView (H1 tipe) custom msg
+h1 : View tipe msg -> View (H1 tipe) msg
 h1 child =
     View <| H1 (toSubView child)
 
 
-h2 : CustomView tipe custom msg -> CustomView (H2 tipe) custom msg
+h2 : View tipe msg -> View (H2 tipe) msg
 h2 child =
     View <| H2 (toSubView child)
 
 
-h3 : CustomView tipe custom msg -> CustomView (H3 tipe) custom msg
+h3 : View tipe msg -> View (H3 tipe) msg
 h3 child =
     View <| H3 (toSubView child)
 
 
-section : CustomView tipe custom msg -> CustomView (Section tipe) custom msg
+section : View tipe msg -> View (Section tipe) msg
 section child =
     View <| Section (toSubView child)
 
 
-p : CustomView tipe custom msg -> CustomView (P tipe) custom msg
+p : View tipe msg -> View (P tipe) msg
 p child =
     View <| P (toSubView child)
 
 
-onClick : msg -> CustomView tipe custom msg -> CustomView (On Click msg tipe) custom msg
+onClick : msg -> View tipe msg -> View (On Click msg tipe) msg
 onClick msg child =
     on "click" (Json.Decode.succeed msg) child
 
 
-on : String -> Decoder msg -> CustomView tipe custom msg -> CustomView (On event msg tipe) custom msg
+on : String -> Decoder msg -> View tipe msg -> View (On event msg tipe) msg
 on event msgDecoder child =
     View <| On event msgDecoder (toSubView child)
 
 
-text : String -> CustomView String custom msg
+text : String -> View String msg
 text text =
     View <| Text text
 
 
-list : List (CustomView tipe custom msg) -> CustomView (List tipe) custom msg
+list : List (View tipe msg) -> View (List tipe) msg
 list xs =
     View <| List (List.map toSubView xs)
 
 
-tuple2 : CustomView tipe1 custom msg -> CustomView tipe2 custom msg -> CustomView ( tipe1, tipe2 ) custom msg
+tuple2 : View tipe1 msg -> View tipe2 msg -> View ( tipe1, tipe2 ) msg
 tuple2 child1 child2 =
     View <| List [ toSubView child1, toSubView child2 ]
 
 
-within : (a -> b) -> CustomView (a -> b) custom msg
+within : (a -> b) -> View (a -> b) msg
 within _ =
     View <| List []
 
 
-add : CustomView tipe1 custom msg -> CustomView (tipe1 -> tipe2) custom msg -> CustomView tipe2 custom msg
+add : View tipe1 msg -> View (tipe1 -> tipe2) msg -> View tipe2 msg
 add child2 child1 =
     View <|
         case ( toSubView child1, toSubView child2 ) of
@@ -167,12 +158,12 @@ add child2 child1 =
 
 {-| Useful during development, to get unimplemented parts of view functions compiling.
 -}
-debug : CustomView tipe custom msg
+debug : View tipe msg
 debug =
     View <| Text "Debugging value. Remove me!"
 
 
-map : (msgA -> msgB) -> CustomView tipe custom msgA -> CustomView tipe custom msgB
+map : (msgA -> msgB) -> View tipe msgA -> View tipe msgB
 map fn (View subView) =
     View (mapSubView fn subView)
 
@@ -188,7 +179,7 @@ we only see the widget name instead.
     type ChatBoxWidget
         = ChatBoxWidget ( H2 String, List Message )
 
-    view : Model -> View ChatBoxWidget custom msg
+    view : Model -> View ChatBoxWidget msg
     view model =
         name ChatBoxWidget
             ( h2 (text "Chatbox")
@@ -196,12 +187,12 @@ we only see the widget name instead.
             )
 
 -}
-name : (a -> b) -> CustomView a custom msg -> CustomView b custom msg
+name : (a -> b) -> View a msg -> View b msg
 name _ (View subView) =
     View subView
 
 
-mapSubView : (msgA -> msgB) -> SubView custom msgA -> SubView custom msgB
+mapSubView : (msgA -> msgB) -> SubView msgA -> SubView msgB
 mapSubView fn subView =
     case subView of
         H1 child ->
@@ -237,66 +228,55 @@ mapSubView fn subView =
         On event msgDecoder child ->
             On event (Json.Decode.map fn msgDecoder) (mapSubView fn child)
 
-        Custom custom child ->
-            Custom custom (mapSubView fn child)
-
 
 
 -- # View generation
 -- One example of a view interpreter, this one producing plain Html.
 
 
-toHtml : (custom -> Html msg -> Html msg) -> CustomView tipe custom msg -> Html msg
-toHtml viewCustom (View subView) =
-    mkSubView viewCustom [] subView
+toHtml : View tipe msg -> Html.Html msg
+toHtml (View subView) =
+    mkSubView [] subView
 
 
-toHtmlSimple : CustomView tipe custom msg -> Html msg
-toHtmlSimple =
-    toHtml (always identity)
-
-
-mkSubView : (custom -> Html msg -> Html msg) -> List (Html.Attribute msg) -> SubView custom msg -> Html msg
-mkSubView viewCustom attrs subView =
+mkSubView : List (Html.Attribute msg) -> SubView msg -> Html.Html msg
+mkSubView attrs subView =
     case subView of
         H1 child ->
-            Html.h1 attrs (List.map (mkSubView viewCustom []) (toChildren child))
+            Html.h1 attrs (List.map (mkSubView []) (toChildren child))
 
         H2 child ->
-            Html.h2 attrs (List.map (mkSubView viewCustom []) (toChildren child))
+            Html.h2 attrs (List.map (mkSubView []) (toChildren child))
 
         H3 child ->
-            Html.h3 attrs (List.map (mkSubView viewCustom []) (toChildren child))
+            Html.h3 attrs (List.map (mkSubView []) (toChildren child))
 
         H4 child ->
-            Html.h4 attrs (List.map (mkSubView viewCustom []) (toChildren child))
+            Html.h4 attrs (List.map (mkSubView []) (toChildren child))
 
         H5 child ->
-            Html.h5 attrs (List.map (mkSubView viewCustom []) (toChildren child))
+            Html.h5 attrs (List.map (mkSubView []) (toChildren child))
 
         H6 child ->
-            Html.h6 attrs (List.map (mkSubView viewCustom []) (toChildren child))
+            Html.h6 attrs (List.map (mkSubView []) (toChildren child))
 
         Section child ->
-            Html.section attrs (List.map (mkSubView viewCustom []) (toChildren child))
+            Html.section attrs (List.map (mkSubView []) (toChildren child))
 
         P child ->
-            Html.p attrs (List.map (mkSubView viewCustom []) (toChildren child))
+            Html.p attrs (List.map (mkSubView []) (toChildren child))
 
         Text text ->
             Html.text text
 
         List children ->
-            Html.div attrs (List.map (mkSubView viewCustom []) children)
+            Html.div attrs (List.map (mkSubView []) children)
 
         On event msgDecoder child ->
-            mkSubView viewCustom [ Html.Events.on event msgDecoder ] child
-
-        Custom custom child ->
-            viewCustom custom (mkSubView viewCustom attrs child)
+            mkSubView [ Html.Events.on event msgDecoder ] child
 
 
-toChildren : SubView custom msg -> List (SubView custom msg)
+toChildren : SubView msg -> List (SubView msg)
 toChildren subView =
     case subView of
         H1 _ ->
@@ -330,7 +310,4 @@ toChildren subView =
             children
 
         On _ _ _ ->
-            [ subView ]
-
-        Custom _ _ ->
             [ subView ]
