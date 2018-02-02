@@ -62,7 +62,7 @@ type alias ListPosts =
 
 
 type SinglePost
-    = SinglePost ( PostTitle, PostContent )
+    = SinglePost PostTitle PostContent
 
 
 type alias PostTitle =
@@ -113,8 +113,9 @@ viewHome posts =
 
 viewPost : Post -> Html SinglePost Msg
 viewPost post =
-    tuple2 (viewTitle post) (p <| text post.content)
-        |> name SinglePost
+    within SinglePost
+        |> add (viewTitle post)
+        |> add (p <| text post.content)
 
 
 viewTitle : Post -> Html PostTitle Msg

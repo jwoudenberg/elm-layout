@@ -1,4 +1,4 @@
-module Html.Typed exposing (Click, H1, H2, Html, On, P, Section, add, debug, h1, h2, list, map, name, on, onClick, p, section, text, toHtml, tuple2, within)
+module Html.Typed exposing (Click, H1, H2, Html, On, P, Section, add, debug, h1, h2, list, map, name, on, onClick, p, section, text, toHtml, within)
 
 import Html
 import Html.Events
@@ -127,11 +127,6 @@ text text =
 list : List (Html tipe msg) -> Html (List tipe) msg
 list xs =
     Html <| List (List.map toSubHtml xs)
-
-
-tuple2 : Html tipe1 msg -> Html tipe2 msg -> Html ( tipe1, tipe2 ) msg
-tuple2 child1 child2 =
-    Html <| List [ toSubHtml child1, toSubHtml child2 ]
 
 
 within : (a -> b) -> Html (a -> b) msg
