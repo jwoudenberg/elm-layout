@@ -1,4 +1,4 @@
-module Html.Typed exposing (Click, H1, H2, Html, On, P, Section, add, debug, h1, h2, list, map, name, on, onClick, p, section, text, toHtml, within)
+module Html.Typed exposing (Click, H1, H2, Html, On, P, Section, add, debug, h1, h2, list, map, name, on, onClick, p, section, text, toRaw, within)
 
 import Html
 import Html.Events
@@ -229,8 +229,8 @@ mapSubHtml fn subHtml =
 -- One example of a view interpreter, this one producing plain Html.
 
 
-toHtml : Html tipe msg -> Html.Html msg
-toHtml (Html subHtml) =
+toRaw : Html tipe msg -> Html.Html msg
+toRaw (Html subHtml) =
     mkSubHtml [] subHtml
 
 
