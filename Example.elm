@@ -49,7 +49,7 @@ type Page
 
 
 type alias Header =
-    On Click Msg (H1 {} String)
+    H1 { onClick : Msg } String
 
 
 type Body
@@ -66,7 +66,7 @@ type PostBody
 
 
 type alias PostTitle =
-    On Click Msg (H2 {} String)
+    H2 { onClick : Msg } String
 
 
 type alias PostContent =
@@ -103,7 +103,7 @@ view model =
 
 viewHeader : Html Header Msg
 viewHeader =
-    onClick ToHome (h1 (text "My Blog!"))
+    h1 [ onClick ToHome ] (text "My Blog!")
 
 
 viewHome : List Post -> Html (List SinglePost) Msg
@@ -115,13 +115,15 @@ viewPost : Post -> Html SinglePost Msg
 viewPost post =
     within PostBody
         |> add (viewTitle post)
-        |> add (p <| text post.content)
-        |> section
+        |> add (p [] <| text post.content)
+        |> section []
 
 
 viewTitle : Post -> Html PostTitle Msg
 viewTitle post =
-    onClick (ToPost post.id) (h2 <| text post.title)
+    h2
+        [ onClick (ToPost post.id) ]
+        (text post.title)
 
 
 type MyWidget

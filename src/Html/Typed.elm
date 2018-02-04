@@ -1,4 +1,4 @@
-module Html.Typed exposing (Click, H1, H2, Html, On, P, Section, add, debug, fromRaw, h1, h2, list, map, name, on, onClick, p, section, text, toRaw, within)
+module Html.Typed exposing (H1, H2, Html, P, Section, add, debug, fromRaw, h1, h2, list, map, name, on, onClick, p, section, text, toRaw, within)
 
 import Html
 import Html.Events
@@ -42,14 +42,6 @@ type P attrs child
     = PType Never
 
 
-type On event msg child
-    = OnType Never
-
-
-type Click
-    = Click Never
-
-
 
 -- # Single type representation
 -- This is meant for creating view functions.
@@ -66,11 +58,18 @@ type Html tipe msg
 
 
 type SubHtml msg
-    = Node String (SubHtml msg)
+    = Node String (List (SubAttr msg)) (SubHtml msg)
     | Text String
     | List (List (SubHtml msg))
-    | On String (Decoder msg) (SubHtml msg)
     | Raw (Html.Html msg)
+
+
+type Attr attrs msg
+    = Attr (SubAttr msg)
+
+
+type SubAttr msg
+    = On2 String (Decoder msg)
 
 
 toSubHtml : Html tipe msg -> SubHtml msg
@@ -78,39 +77,44 @@ toSubHtml (Html subHtml) =
     subHtml
 
 
-h1 : Html tipe msg -> Html (H1 attrs tipe) msg
-h1 child =
-    Html <| Node "h1" (toSubHtml child)
+toSubAttr : Attr attrs msg -> SubAttr msg
+toSubAttr (Attr subAttr) =
+    subAttr
 
 
-h2 : Html tipe msg -> Html (H2 attrs tipe) msg
-h2 child =
-    Html <| Node "h2" (toSubHtml child)
+h1 : List (Attr attrs msg) -> Html tipe msg -> Html (H1 attrs tipe) msg
+h1 attrs child =
+    Html <| Node "h1" (List.map toSubAttr attrs) (toSubHtml child)
 
 
-h3 : Html tipe msg -> Html (H3 attrs tipe) msg
-h3 child =
-    Html <| Node "h3" (toSubHtml child)
+h2 : List (Attr attrs msg) -> Html tipe msg -> Html (H2 attrs tipe) msg
+h2 attrs child =
+    Html <| Node "h2" (List.map toSubAttr attrs) (toSubHtml child)
 
 
-section : Html tipe msg -> Html (Section attrs tipe) msg
-section child =
-    Html <| Node "section" (toSubHtml child)
+h3 : List (Attr attrs msg) -> Html tipe msg -> Html (H3 attrs tipe) msg
+h3 attrs child =
+    Html <| Node "h3" (List.map toSubAttr attrs) (toSubHtml child)
 
 
-p : Html tipe msg -> Html (P attrs tipe) msg
-p child =
-    Html <| Node "p" (toSubHtml child)
+section : List (Attr attrs msg) -> Html tipe msg -> Html (Section attrs tipe) msg
+section attrs child =
+    Html <| Node "section" (List.map toSubAttr attrs) (toSubHtml child)
 
 
-onClick : msg -> Html tipe msg -> Html (On Click msg tipe) msg
-onClick msg child =
-    on "click" (Json.Decode.succeed msg) child
+p : List (Attr attrs msg) -> Html tipe msg -> Html (P attrs tipe) msg
+p attrs child =
+    Html <| Node "p" (List.map toSubAttr attrs) (toSubHtml child)
 
 
-on : String -> Decoder msg -> Html tipe msg -> Html (On event msg tipe) msg
-on event msgDecoder child =
-    Html <| On event msgDecoder (toSubHtml child)
+onClick : msg -> Attr { r | onClick : msg } msg
+onClick msg =
+    on "click" (Json.Decode.succeed msg)
+
+
+on : String -> Decoder msg -> Attr attrs msg
+on event msgDecoder =
+    Attr (On2 event msgDecoder)
 
 
 text : String -> Html String msg
@@ -184,8 +188,8 @@ name _ (Html subHtml) =
 mapSubHtml : (msgA -> msgB) -> SubHtml msgA -> SubHtml msgB
 mapSubHtml fn subHtml =
     case subHtml of
-        Node tag child ->
-            Node tag (mapSubHtml fn child)
+        Node tag attrs child ->
+            Node tag (List.map (mapAttr fn) attrs) (mapSubHtml fn child)
 
         Text text ->
             Text text
@@ -193,11 +197,15 @@ mapSubHtml fn subHtml =
         List children ->
             List (List.map (mapSubHtml fn) children)
 
-        On event msgDecoder child ->
-            On event (Json.Decode.map fn msgDecoder) (mapSubHtml fn child)
-
         Raw html ->
             Raw (Html.map fn html)
+
+
+mapAttr : (msgA -> msgB) -> SubAttr msgA -> SubAttr msgB
+mapAttr fn attr =
+    case attr of
+        On2 event msgDecoder ->
+            On2 event (Json.Decode.map fn msgDecoder)
 
 
 
@@ -218,8 +226,8 @@ fromRaw html =
 mkSubHtml : List (Html.Attribute msg) -> SubHtml msg -> Html.Html msg
 mkSubHtml attrs subHtml =
     case subHtml of
-        Node tag child ->
-            Html.node tag attrs (List.map (mkSubHtml []) (toChildren child))
+        Node tag attrs child ->
+            Html.node tag (List.map mkAttr attrs) (List.map (mkSubHtml []) (toChildren child))
 
         Text text ->
             Html.text text
@@ -227,17 +235,21 @@ mkSubHtml attrs subHtml =
         List children ->
             Html.div attrs (List.map (mkSubHtml []) children)
 
-        On event msgDecoder child ->
-            mkSubHtml [ Html.Events.on event msgDecoder ] child
-
         Raw html ->
             html
+
+
+mkAttr : SubAttr msg -> Html.Attribute msg
+mkAttr attr =
+    case attr of
+        On2 event msgDecoder ->
+            Html.Events.on event msgDecoder
 
 
 toChildren : SubHtml msg -> List (SubHtml msg)
 toChildren subHtml =
     case subHtml of
-        Node _ _ ->
+        Node _ _ _ ->
             [ subHtml ]
 
         Text _ ->
@@ -245,9 +257,6 @@ toChildren subHtml =
 
         List children ->
             children
-
-        On _ _ _ ->
-            [ subHtml ]
 
         Raw _ ->
             []
