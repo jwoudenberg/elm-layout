@@ -10,35 +10,35 @@ import Json.Decode exposing (Decoder)
 -- Use the standard types defined here or create your own.
 
 
-type H1 child
+type H1 attrs child
     = H1Type Never
 
 
-type H2 child
+type H2 attrs child
     = H2Type Never
 
 
-type H3 child
+type H3 attrs child
     = H3Type Never
 
 
-type H4 child
+type H4 attrs child
     = H4Type Never
 
 
-type H5 child
+type H5 attrs child
     = H5Type Never
 
 
-type H6 child
+type H6 attrs child
     = H6Type Never
 
 
-type Section child
+type Section attrs child
     = SectionType Never
 
 
-type P child
+type P attrs child
     = PType Never
 
 
@@ -78,27 +78,27 @@ toSubHtml (Html subHtml) =
     subHtml
 
 
-h1 : Html tipe msg -> Html (H1 tipe) msg
+h1 : Html tipe msg -> Html (H1 attrs tipe) msg
 h1 child =
     Html <| Node "h1" (toSubHtml child)
 
 
-h2 : Html tipe msg -> Html (H2 tipe) msg
+h2 : Html tipe msg -> Html (H2 attrs tipe) msg
 h2 child =
     Html <| Node "h2" (toSubHtml child)
 
 
-h3 : Html tipe msg -> Html (H3 tipe) msg
+h3 : Html tipe msg -> Html (H3 attrs tipe) msg
 h3 child =
     Html <| Node "h3" (toSubHtml child)
 
 
-section : Html tipe msg -> Html (Section tipe) msg
+section : Html tipe msg -> Html (Section attrs tipe) msg
 section child =
     Html <| Node "section" (toSubHtml child)
 
 
-p : Html tipe msg -> Html (P tipe) msg
+p : Html tipe msg -> Html (P attrs tipe) msg
 p child =
     Html <| Node "p" (toSubHtml child)
 

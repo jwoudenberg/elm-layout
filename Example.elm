@@ -49,7 +49,7 @@ type Page
 
 
 type alias Header =
-    On Click Msg (H1 String)
+    On Click Msg (H1 {} String)
 
 
 type Body
@@ -58,7 +58,7 @@ type Body
 
 
 type alias SinglePost =
-    Section PostBody
+    Section {} PostBody
 
 
 type PostBody
@@ -66,11 +66,11 @@ type PostBody
 
 
 type alias PostTitle =
-    On Click Msg (H2 String)
+    On Click Msg (H2 {} String)
 
 
 type alias PostContent =
-    P String
+    P {} String
 
 
 type alias Post =
