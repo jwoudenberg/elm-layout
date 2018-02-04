@@ -66,14 +66,7 @@ type Html tipe msg
 
 
 type SubHtml msg
-    = H1 (SubHtml msg)
-    | H2 (SubHtml msg)
-    | H3 (SubHtml msg)
-    | H4 (SubHtml msg)
-    | H5 (SubHtml msg)
-    | H6 (SubHtml msg)
-    | Section (SubHtml msg)
-    | P (SubHtml msg)
+    = Node String (SubHtml msg)
     | Text String
     | List (List (SubHtml msg))
     | On String (Decoder msg) (SubHtml msg)
@@ -87,27 +80,27 @@ toSubHtml (Html subHtml) =
 
 h1 : Html tipe msg -> Html (H1 tipe) msg
 h1 child =
-    Html <| H1 (toSubHtml child)
+    Html <| Node "h1" (toSubHtml child)
 
 
 h2 : Html tipe msg -> Html (H2 tipe) msg
 h2 child =
-    Html <| H2 (toSubHtml child)
+    Html <| Node "h2" (toSubHtml child)
 
 
 h3 : Html tipe msg -> Html (H3 tipe) msg
 h3 child =
-    Html <| H3 (toSubHtml child)
+    Html <| Node "h3" (toSubHtml child)
 
 
 section : Html tipe msg -> Html (Section tipe) msg
 section child =
-    Html <| Section (toSubHtml child)
+    Html <| Node "section" (toSubHtml child)
 
 
 p : Html tipe msg -> Html (P tipe) msg
 p child =
-    Html <| P (toSubHtml child)
+    Html <| Node "p" (toSubHtml child)
 
 
 onClick : msg -> Html tipe msg -> Html (On Click msg tipe) msg
@@ -191,29 +184,8 @@ name _ (Html subHtml) =
 mapSubHtml : (msgA -> msgB) -> SubHtml msgA -> SubHtml msgB
 mapSubHtml fn subHtml =
     case subHtml of
-        H1 child ->
-            H1 (mapSubHtml fn child)
-
-        H2 child ->
-            H2 (mapSubHtml fn child)
-
-        H3 child ->
-            H3 (mapSubHtml fn child)
-
-        H4 child ->
-            H4 (mapSubHtml fn child)
-
-        H5 child ->
-            H5 (mapSubHtml fn child)
-
-        H6 child ->
-            H6 (mapSubHtml fn child)
-
-        Section child ->
-            Section (mapSubHtml fn child)
-
-        P child ->
-            P (mapSubHtml fn child)
+        Node tag child ->
+            Node tag (mapSubHtml fn child)
 
         Text text ->
             Text text
@@ -246,29 +218,8 @@ fromRaw html =
 mkSubHtml : List (Html.Attribute msg) -> SubHtml msg -> Html.Html msg
 mkSubHtml attrs subHtml =
     case subHtml of
-        H1 child ->
-            Html.h1 attrs (List.map (mkSubHtml []) (toChildren child))
-
-        H2 child ->
-            Html.h2 attrs (List.map (mkSubHtml []) (toChildren child))
-
-        H3 child ->
-            Html.h3 attrs (List.map (mkSubHtml []) (toChildren child))
-
-        H4 child ->
-            Html.h4 attrs (List.map (mkSubHtml []) (toChildren child))
-
-        H5 child ->
-            Html.h5 attrs (List.map (mkSubHtml []) (toChildren child))
-
-        H6 child ->
-            Html.h6 attrs (List.map (mkSubHtml []) (toChildren child))
-
-        Section child ->
-            Html.section attrs (List.map (mkSubHtml []) (toChildren child))
-
-        P child ->
-            Html.p attrs (List.map (mkSubHtml []) (toChildren child))
+        Node tag child ->
+            Html.node tag attrs (List.map (mkSubHtml []) (toChildren child))
 
         Text text ->
             Html.text text
@@ -286,28 +237,7 @@ mkSubHtml attrs subHtml =
 toChildren : SubHtml msg -> List (SubHtml msg)
 toChildren subHtml =
     case subHtml of
-        H1 _ ->
-            [ subHtml ]
-
-        H2 _ ->
-            [ subHtml ]
-
-        H3 _ ->
-            [ subHtml ]
-
-        H4 _ ->
-            [ subHtml ]
-
-        H5 _ ->
-            [ subHtml ]
-
-        H6 _ ->
-            [ subHtml ]
-
-        Section _ ->
-            [ subHtml ]
-
-        P _ ->
+        Node _ _ ->
             [ subHtml ]
 
         Text _ ->
