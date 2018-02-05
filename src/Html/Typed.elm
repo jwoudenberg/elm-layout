@@ -69,7 +69,7 @@ type Attr attrs msg
 
 
 type SubAttr msg
-    = On2 String (Decoder msg)
+    = On String (Decoder msg)
 
 
 toSubHtml : Html tipe msg -> SubHtml msg
@@ -129,7 +129,7 @@ onBlur msg =
 
 on : String -> Decoder msg -> Attr attrs msg
 on event msgDecoder =
-    Attr (On2 event msgDecoder)
+    Attr (On event msgDecoder)
 
 
 text : String -> Html String msg
@@ -219,8 +219,8 @@ mapSubHtml fn subHtml =
 mapAttr : (msgA -> msgB) -> SubAttr msgA -> SubAttr msgB
 mapAttr fn attr =
     case attr of
-        On2 event msgDecoder ->
-            On2 event (Json.Decode.map fn msgDecoder)
+        On event msgDecoder ->
+            On event (Json.Decode.map fn msgDecoder)
 
 
 
@@ -257,7 +257,7 @@ mkSubHtml attrs subHtml =
 mkAttr : SubAttr msg -> Html.Attribute msg
 mkAttr attr =
     case attr of
-        On2 event msgDecoder ->
+        On event msgDecoder ->
             Html.Events.on event msgDecoder
 
 
