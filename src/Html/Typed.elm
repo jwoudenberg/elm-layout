@@ -112,6 +112,21 @@ onClick msg =
     on "click" (Json.Decode.succeed msg)
 
 
+onDoubleClick : msg -> Attr { r | onDoubleClick : msg } msg
+onDoubleClick msg =
+    on "dblclick" (Json.Decode.succeed msg)
+
+
+onInput : (String -> msg) -> Attr { r | onInput : msg } msg
+onInput tagger =
+    on "input" (Json.Decode.map tagger Html.Events.targetValue)
+
+
+onBlur : msg -> Attr { r | onBlur : msg } msg
+onBlur msg =
+    on "blur" (Json.Decode.succeed msg)
+
+
 on : String -> Decoder msg -> Attr attrs msg
 on event msgDecoder =
     Attr (On2 event msgDecoder)
