@@ -1,8 +1,12 @@
-module Html.Typed exposing (H1, H2, Html, P, Section, add, debug, fromRaw, h1, h2, list, map, name, on, onClick, p, section, text, toRaw, within)
+module Html.Typed exposing (Attribute, H1, H2, Html, P, Section, add, debug, fromRaw, h1, h2, list, map, name, p, section, text, toRaw, within)
 
 import Html
-import Html.Events
-import Json.Decode exposing (Decoder)
+import Html.Typed.Internal exposing (SubAttribute, mapAttr, mkAttr, toSubAttr)
+
+
+type alias Attribute attrs msg =
+    Html.Typed.Internal.Attribute attrs msg
+
 
 
 -- # Elements
@@ -58,18 +62,10 @@ type Html tipe msg
 
 
 type SubHtml msg
-    = Node String (List (SubAttr msg)) (SubHtml msg)
+    = Node String (List (SubAttribute msg)) (SubHtml msg)
     | Text String
     | List (List (SubHtml msg))
     | Raw (Html.Html msg)
-
-
-type Attr attrs msg
-    = Attr (SubAttr msg)
-
-
-type SubAttr msg
-    = On String (Decoder msg)
 
 
 toSubHtml : Html tipe msg -> SubHtml msg
@@ -77,59 +73,29 @@ toSubHtml (Html subHtml) =
     subHtml
 
 
-toSubAttr : Attr attrs msg -> SubAttr msg
-toSubAttr (Attr subAttr) =
-    subAttr
-
-
-h1 : List (Attr attrs msg) -> Html tipe msg -> Html (H1 attrs tipe) msg
+h1 : List (Attribute attrs msg) -> Html tipe msg -> Html (H1 attrs tipe) msg
 h1 attrs child =
     Html <| Node "h1" (List.map toSubAttr attrs) (toSubHtml child)
 
 
-h2 : List (Attr attrs msg) -> Html tipe msg -> Html (H2 attrs tipe) msg
+h2 : List (Attribute attrs msg) -> Html tipe msg -> Html (H2 attrs tipe) msg
 h2 attrs child =
     Html <| Node "h2" (List.map toSubAttr attrs) (toSubHtml child)
 
 
-h3 : List (Attr attrs msg) -> Html tipe msg -> Html (H3 attrs tipe) msg
+h3 : List (Attribute attrs msg) -> Html tipe msg -> Html (H3 attrs tipe) msg
 h3 attrs child =
     Html <| Node "h3" (List.map toSubAttr attrs) (toSubHtml child)
 
 
-section : List (Attr attrs msg) -> Html tipe msg -> Html (Section attrs tipe) msg
+section : List (Attribute attrs msg) -> Html tipe msg -> Html (Section attrs tipe) msg
 section attrs child =
     Html <| Node "section" (List.map toSubAttr attrs) (toSubHtml child)
 
 
-p : List (Attr attrs msg) -> Html tipe msg -> Html (P attrs tipe) msg
+p : List (Attribute attrs msg) -> Html tipe msg -> Html (P attrs tipe) msg
 p attrs child =
     Html <| Node "p" (List.map toSubAttr attrs) (toSubHtml child)
-
-
-onClick : msg -> Attr { r | onClick : msg } msg
-onClick msg =
-    on "click" (Json.Decode.succeed msg)
-
-
-onDoubleClick : msg -> Attr { r | onDoubleClick : msg } msg
-onDoubleClick msg =
-    on "dblclick" (Json.Decode.succeed msg)
-
-
-onInput : (String -> msg) -> Attr { r | onInput : msg } msg
-onInput tagger =
-    on "input" (Json.Decode.map tagger Html.Events.targetValue)
-
-
-onBlur : msg -> Attr { r | onBlur : msg } msg
-onBlur msg =
-    on "blur" (Json.Decode.succeed msg)
-
-
-on : String -> Decoder msg -> Attr attrs msg
-on event msgDecoder =
-    Attr (On event msgDecoder)
 
 
 text : String -> Html String msg
@@ -216,13 +182,6 @@ mapSubHtml fn subHtml =
             Raw (Html.map fn html)
 
 
-mapAttr : (msgA -> msgB) -> SubAttr msgA -> SubAttr msgB
-mapAttr fn attr =
-    case attr of
-        On event msgDecoder ->
-            On event (Json.Decode.map fn msgDecoder)
-
-
 
 -- # Html generation
 -- One example of a view interpreter, this one producing plain Html.
@@ -252,13 +211,6 @@ mkSubHtml attrs subHtml =
 
         Raw html ->
             html
-
-
-mkAttr : SubAttr msg -> Html.Attribute msg
-mkAttr attr =
-    case attr of
-        On event msgDecoder ->
-            Html.Events.on event msgDecoder
 
 
 toChildren : SubHtml msg -> List (SubHtml msg)
