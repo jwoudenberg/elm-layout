@@ -1,49 +1,12 @@
-module Html.Typed exposing (Attribute, H1, H2, Html, P, Section, add, debug, fromRaw, h1, h2, list, map, name, p, section, text, toRaw, within)
+module Html.Typed exposing (Attribute, Html, add, debug, fromRaw, h1, h2, list, map, name, p, section, text, toRaw, within)
 
 import Html
 import Html.Typed.Internal exposing (SubAttribute, mapAttr, mkAttr, toSubAttr)
+import Html.Typed.Types exposing (..)
 
 
 type alias Attribute attrs msg =
     Html.Typed.Internal.Attribute attrs msg
-
-
-
--- # Elements
--- This is a type level API for Html documents.
--- Use the standard types defined here or create your own.
-
-
-type H1 attrs child
-    = H1Type Never
-
-
-type H2 attrs child
-    = H2Type Never
-
-
-type H3 attrs child
-    = H3Type Never
-
-
-type H4 attrs child
-    = H4Type Never
-
-
-type H5 attrs child
-    = H5Type Never
-
-
-type H6 attrs child
-    = H6Type Never
-
-
-type Section attrs child
-    = SectionType Never
-
-
-type P attrs child
-    = PType Never
 
 
 
