@@ -1,3 +1,9 @@
 module Html.Typed.Attributes exposing (..)
 
-import Html.Typed.Internal exposing (SubAttribute)
+import Html
+import Html.Typed.Internal exposing (Attribute)
+
+
+fromRaw : Html.Attribute msg -> Attribute attrs msg
+fromRaw =
+    Html.Typed.Internal.fromRaw
