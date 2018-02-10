@@ -3,7 +3,6 @@ module Example exposing (..)
 import Html
 import Html.Typed exposing (..)
 import Html.Typed.Events exposing (..)
-import Html.Typed.Types exposing (..)
 
 
 type alias Model =
