@@ -1,4 +1,4 @@
-module Example exposing (..)
+module Main exposing (..)
 
 import Html
 import Html.Typed exposing (..)
@@ -90,16 +90,16 @@ view model =
                 |> List.filter (\p -> Just p.id == model.currentPost)
                 |> List.head
     in
-    within Page
-        |> add viewHeader
-        |> add
-            (case currentPost of
-                Nothing ->
-                    name ListPosts <| viewHome model.posts
+        within Page
+            |> add viewHeader
+            |> add
+                (case currentPost of
+                    Nothing ->
+                        name ListPosts <| viewHome model.posts
 
-                Just post ->
-                    name SinglePost <| viewPost post
-            )
+                    Just post ->
+                        name SinglePost <| viewPost post
+                )
 
 
 viewHeader : Html Header Msg
@@ -125,12 +125,3 @@ viewTitle post =
     h2
         [ onClick (ToPost post.id) ]
         (text post.title)
-
-
-type MyWidget
-    = MyWidget
-
-
-myWidget : Html.Html msg
-myWidget =
-    Html.text "Hello World!"
