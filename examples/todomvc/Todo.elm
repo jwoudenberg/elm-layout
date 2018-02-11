@@ -7,11 +7,12 @@ Based on the original TodoMVC which can be found here: <https://github.com/evanc
 -}
 
 import Dom
-import Html exposing (..)
+import Html
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
-import Html.Keyed as Keyed
-import Html.Lazy exposing (lazy, lazy2)
+import Html.Typed exposing (..)
+import Html.Typed.Attributes exposing (..)
+import Html.Typed.Events exposing (..)
+import Html.Events exposing (keyCode)
 import Json.Decode as Json
 import String
 import Task
@@ -21,7 +22,7 @@ main : Program (Maybe Model) Model Msg
 main =
     Html.programWithFlags
         { init = init
-        , view = view
+        , view = view >> Html.Typed.toRaw
         , update = updateWithStorage
         , subscriptions = \_ -> Sub.none
         }
@@ -196,41 +197,124 @@ update msg model =
 -- VIEW
 
 
-view : Model -> Html Msg
+type Page
+    = Page (Section {} PageBody) PageFooter
+
+
+type PageBody
+    = PageBody PageHeader Entries Controls
+
+
+type alias PageHeader =
+    Header {} InputContent
+
+
+type InputContent
+    = InputContent (H1 {} String) (Input { onKeyDown : Msg, onInput : Msg } ())
+
+
+type alias Entries =
+    Section {} EntriesContent
+
+
+type EntriesContent
+    = EntriesContent (Input { onClick : Msg } ()) (Label {} String) (Ul {} (List TodoItem))
+
+
+type alias TodoItem =
+    Li {} TodoItemContents
+
+
+type TodoItemContents
+    = TodoItemContents ViewMode EditMode
+
+
+type ViewMode
+    = ViewMode (Input { onClick : Msg } ()) (Label { onDoubleClick : Msg } String) (Button { onClick : Msg } ())
+
+
+type alias EditMode =
+    Input { onInput : Msg, onBlur : Msg, onKeyDown : Msg } ()
+
+
+type alias Controls =
+    Footer {} ControlsContent
+
+
+type ControlsContent
+    = ControlsContent ControlsCount ControlsFilters ControlsClear
+
+
+type ControlsCount
+    = ControlsCount (Strong {} String) String
+
+
+type alias ControlsFilters =
+    Ul {} ControlsFiltersContent
+
+
+type ControlsFiltersContent
+    = ControlsFiltersContent Filter String Filter String Filter
+
+
+type alias Filter =
+    Li { onClick : Msg } (A {} String)
+
+
+type alias ControlsClear =
+    Button { onClick : Msg } String
+
+
+type alias PageFooter =
+    Footer {} ( P {} String, Link, Link )
+
+
+type alias Link =
+    P {} ( String, A {} String )
+
+
+view : Model -> Html Page Msg
 view model =
     div
-        [ class "todomvc-wrapper"
-        , style [ ( "visibility", "hidden" ) ]
+        [ attr <| class "todomvc-wrapper"
+        , attr <| style [ ( "visibility", "hidden" ) ]
         ]
-        [ section
-            [ class "todoapp" ]
-            [ lazy viewInput model.field
-            , lazy2 viewEntries model.visibility model.entries
-            , lazy2 viewControls model.visibility model.entries
-            ]
-        , infoFooter
-        ]
+        (within Page
+            |> add
+                (section
+                    [ attr <| class "todoapp" ]
+                    (within PageBody
+                        |> add (viewInput model.field)
+                        |> add (viewEntries model.visibility model.entries)
+                        |> add (viewControls model.visibility model.entries)
+                    )
+                )
+            |> add infoFooter
+        )
 
 
-viewInput : String -> Html Msg
+viewInput : String -> Html PageHeader Msg
 viewInput task =
     header
-        [ class "header" ]
-        [ h1 [] [ text "todos" ]
-        , input
-            [ class "new-todo"
-            , placeholder "What needs to be done?"
-            , autofocus True
-            , value task
-            , name "newTodo"
-            , onInput UpdateField
-            , onEnter Add
-            ]
-            []
-        ]
+        [ attr <| class "header" ]
+        (within InputContent
+            |> add (h1 [] (text "todos"))
+            |> add
+                (input
+                    [ attr <| class "new-todo"
+                    , attr <| placeholder "What needs to be done?"
+                    , attr <| autofocus True
+                    , attr <| value task
+                    , attr <| name "newTodo"
+                    , onInput UpdateField
+                    , onEnter Add
+                    ]
+                    empty
+                )
+        )
 
 
-onEnter : Msg -> Attribute Msg
+onEnter : Msg -> Attribute { r | onKeyDown : Msg } Msg
 onEnter msg =
     let
         isEnter code =
@@ -239,14 +323,14 @@ onEnter msg =
             else
                 Json.fail "not ENTER"
     in
-        on "keydown" (Json.andThen isEnter keyCode)
+        on .onKeyDown "keydown" (Json.andThen isEnter keyCode)
 
 
 
 -- VIEW ALL ENTRIES
 
 
-viewEntries : String -> List Entry -> Html Msg
+viewEntries : String -> List Entry -> Html Entries Msg
 viewEntries visibility entries =
     let
         isVisible todo =
@@ -270,74 +354,96 @@ viewEntries visibility entries =
                 "visible"
     in
         section
-            [ class "main"
-            , style [ ( "visibility", cssVisibility ) ]
+            [ attr <| class "main"
+            , attr <| style [ ( "visibility", cssVisibility ) ]
             ]
-            [ input
-                [ class "toggle-all"
-                , type_ "checkbox"
-                , name "toggle"
-                , checked allCompleted
-                , onClick (CheckAll (not allCompleted))
-                ]
-                []
-            , label
-                [ for "toggle-all" ]
-                [ text "Mark all as complete" ]
-            , Keyed.ul [ class "todo-list" ] <|
-                List.map viewKeyedEntry (List.filter isVisible entries)
-            ]
+            (within EntriesContent
+                |> add
+                    (input
+                        [ attr <| class "toggle-all"
+                        , attr <| type_ "checkbox"
+                        , attr <| name "toggle"
+                        , attr <| checked allCompleted
+                        , onClick (CheckAll (not allCompleted))
+                        ]
+                        empty
+                    )
+                |> add
+                    (label
+                        [ attr <| for "toggle-all" ]
+                        (text "Mark all as complete")
+                    )
+                |> add
+                    (ul
+                        [ attr <| class "todo-list" ]
+                        (keyedList <|
+                            List.map viewKeyedEntry (List.filter isVisible entries)
+                        )
+                    )
+            )
 
 
 
 -- VIEW INDIVIDUAL ENTRIES
 
 
-viewKeyedEntry : Entry -> ( String, Html Msg )
+viewKeyedEntry : Entry -> ( String, Html TodoItem Msg )
 viewKeyedEntry todo =
-    ( toString todo.id, lazy viewEntry todo )
+    ( toString todo.id, viewEntry todo )
 
 
-viewEntry : Entry -> Html Msg
+viewEntry : Entry -> Html TodoItem Msg
 viewEntry todo =
     li
-        [ classList [ ( "completed", todo.completed ), ( "editing", todo.editing ) ] ]
-        [ div
-            [ class "view" ]
-            [ input
-                [ class "toggle"
-                , type_ "checkbox"
-                , checked todo.completed
-                , onClick (Check todo.id (not todo.completed))
-                ]
-                []
-            , label
-                [ onDoubleClick (EditingEntry todo.id True) ]
-                [ text todo.description ]
-            , button
-                [ class "destroy"
-                , onClick (Delete todo.id)
-                ]
-                []
-            ]
-        , input
-            [ class "edit"
-            , value todo.description
-            , name "title"
-            , id ("todo-" ++ toString todo.id)
-            , onInput (UpdateEntry todo.id)
-            , onBlur (EditingEntry todo.id False)
-            , onEnter (EditingEntry todo.id False)
-            ]
-            []
-        ]
+        [ attr <| classList [ ( "completed", todo.completed ), ( "editing", todo.editing ) ] ]
+        (within TodoItemContents
+            |> add
+                (div
+                    [ attr <| class "view" ]
+                    (within ViewMode
+                        |> add
+                            (input
+                                [ attr <| class "toggle"
+                                , attr <| type_ "checkbox"
+                                , attr <| checked todo.completed
+                                , onClick (Check todo.id (not todo.completed))
+                                ]
+                                empty
+                            )
+                        |> add
+                            (label
+                                [ onDoubleClick (EditingEntry todo.id True) ]
+                                (text todo.description)
+                            )
+                        |> add
+                            (button
+                                [ attr <| class "destroy"
+                                , onClick (Delete todo.id)
+                                ]
+                                empty
+                            )
+                    )
+                )
+            |> add
+                (input
+                    [ attr <| class "edit"
+                    , attr <| value todo.description
+                    , attr <| name "title"
+                    , attr <| id ("todo-" ++ toString todo.id)
+                    , onInput (UpdateEntry todo.id)
+                    , onBlur (EditingEntry todo.id False)
+                    , onEnter (EditingEntry todo.id False)
+                    ]
+                    empty
+                )
+        )
 
 
 
 -- VIEW CONTROLS AND FOOTER
 
 
-viewControls : String -> List Entry -> Html Msg
+viewControls : String -> List Entry -> Html Controls Msg
 viewControls visibility entries =
     let
         entriesCompleted =
@@ -347,16 +453,17 @@ viewControls visibility entries =
             List.length entries - entriesCompleted
     in
         footer
-            [ class "footer"
-            , hidden (List.isEmpty entries)
+            [ attr <| class "footer"
+            , attr <| hidden (List.isEmpty entries)
             ]
-            [ lazy viewControlsCount entriesLeft
-            , lazy viewControlsFilters visibility
-            , lazy viewControlsClear entriesCompleted
-            ]
+            (within ControlsContent
+                |> add (viewControlsCount entriesLeft)
+                |> add (viewControlsFilters visibility)
+                |> add (viewControlsClear entriesCompleted)
+            )
 
 
-viewControlsCount : Int -> Html Msg
+viewControlsCount : Int -> Html ControlsCount Msg
 viewControlsCount entriesLeft =
     let
         item_ =
@@ -366,54 +473,62 @@ viewControlsCount entriesLeft =
                 " items"
     in
         span
-            [ class "todo-count" ]
-            [ strong [] [ text (toString entriesLeft) ]
-            , text (item_ ++ " left")
-            ]
+            [ attr <| class "todo-count" ]
+            (within ControlsCount
+                |> add (strong [] (text (toString entriesLeft)))
+                |> add (text (item_ ++ " left"))
+            )
 
 
-viewControlsFilters : String -> Html Msg
+viewControlsFilters : String -> Html ControlsFilters Msg
 viewControlsFilters visibility =
     ul
-        [ class "filters" ]
-        [ visibilitySwap "#/" "All" visibility
-        , text " "
-        , visibilitySwap "#/active" "Active" visibility
-        , text " "
-        , visibilitySwap "#/completed" "Completed" visibility
-        ]
+        [ attr <| class "filters" ]
+        (within ControlsFiltersContent
+            |> add (visibilitySwap "#/" "All" visibility)
+            |> add (text " ")
+            |> add (visibilitySwap "#/active" "Active" visibility)
+            |> add (text " ")
+            |> add (visibilitySwap "#/completed" "Completed" visibility)
+        )
 
 
-visibilitySwap : String -> String -> String -> Html Msg
+visibilitySwap : String -> String -> String -> Html Filter Msg
 visibilitySwap uri visibility actualVisibility =
     li
         [ onClick (ChangeVisibility visibility) ]
-        [ a [ href uri, classList [ ( "selected", visibility == actualVisibility ) ] ]
-            [ text visibility ]
-        ]
+        (a [ attr <| href uri, attr <| classList [ ( "selected", visibility == actualVisibility ) ] ]
+            (text visibility)
+        )
 
 
-viewControlsClear : Int -> Html Msg
+viewControlsClear : Int -> Html ControlsClear Msg
 viewControlsClear entriesCompleted =
     button
-        [ class "clear-completed"
-        , hidden (entriesCompleted == 0)
+        [ attr <| class "clear-completed"
+        , attr <| hidden (entriesCompleted == 0)
         , onClick DeleteComplete
         ]
-        [ text ("Clear completed (" ++ toString entriesCompleted ++ ")")
-        ]
+        (text ("Clear completed (" ++ toString entriesCompleted ++ ")"))
 
 
-infoFooter : Html msg
+infoFooter : Html PageFooter msg
 infoFooter =
-    footer [ class "info" ]
-        [ p [] [ text "Double-click to edit a todo" ]
-        , p []
-            [ text "Written by "
-            , a [ href "https://github.com/evancz" ] [ text "Evan Czaplicki" ]
-            ]
-        , p []
-            [ text "Part of "
-            , a [ href "http://todomvc.com" ] [ text "TodoMVC" ]
-            ]
-        ]
+    footer [ attr <| class "info" ]
+        (within (,,)
+            |> add (p [] (text "Double-click to edit a todo"))
+            |> add
+                (p []
+                    (within (,)
+                        |> add (text "Written by ")
+                        |> add (a [ attr <| href "https://github.com/evancz" ] (text "Evan Czaplicki"))
+                    )
+                )
+            |> add
+                (p []
+                    (within (,)
+                        |> add (text "Part of ")
+                        |> add (a [ attr <| href "http://todomvc.com" ] (text "TodoMVC"))
+                    )
+                )
+        )
