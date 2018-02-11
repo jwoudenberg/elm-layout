@@ -1,21 +1,21 @@
 {
-  "version": "0.1.0",
-  "summary": "Typed view functions",
-  "repository": "https://github.com/jwoudenberg/html-typed.git",
-  "license": "BSD3",
-  "source-directories": [
-    ".",
-    "./src"
-  ],
-  "exposed-modules": [
-    "Html.Typed",
-    "Html.Typed.Attributes",
-    "Html.Typed.Events"
-  ],
-  "dependencies": {
-    "elm-lang/core": "5.1.1 <= v < 6.0.0",
-    "elm-lang/html": "2.0.0 <= v < 3.0.0",
-    "rtfeldman/elm-css": "9.1.0 <= v < 10.0.0"
-  },
-  "elm-version": "0.18.0 <= v < 0.19.0"
+    "version": "1.0.0",
+    "summary": "Typed view functions",
+    "repository": "https://github.com/jwoudenberg/html-typed.git",
+    "license": "BSD3",
+    "source-directories": [
+        ".",
+        "./src"
+    ],
+    "exposed-modules": [
+        "Html.Typed",
+        "Html.Typed.Attributes",
+        "Html.Typed.Events"
+    ],
+    "dependencies": {
+        "elm-lang/core": "5.1.1 <= v < 6.0.0",
+        "elm-lang/html": "2.0.0 <= v < 3.0.0",
+        "rtfeldman/elm-css": "9.1.0 <= v < 10.0.0"
+    },
+    "elm-version": "0.18.0 <= v < 0.19.0"
 }
