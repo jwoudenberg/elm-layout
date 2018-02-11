@@ -1,11 +1,6 @@
-# TodoMVC in Elm - [Try It!](http://evancz.github.io/elm-todomvc)
+# TodoMVC in Elm using Html.Typed
 
-All of the Elm code lives in `Todo.elm` and relies on the [elm-lang/html][html] library. 
-
-[html]: http://package.elm-lang.org/packages/elm-lang/html/latest 
-
-There also is a port handler set up in `index.html` to store the Elm application's state in `localStorage` on every update.
-
+Based on the original TodoMVC which can be found here: <https://github.com/evancz/elm-todomvc>
 
 ## Build Instructions
 
