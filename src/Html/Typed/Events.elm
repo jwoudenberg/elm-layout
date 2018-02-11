@@ -1,4 +1,4 @@
-module Html.Typed.Events exposing (onBlur, onClick, onDoubleClick, onInput, onMouseDown, onMouseEnter, onMouseLeave, onMouseOut, onMouseOver, onMouseUp)
+module Html.Typed.Events exposing (on, onBlur, onClick, onDoubleClick, onInput, onMouseDown, onMouseEnter, onMouseLeave, onMouseOut, onMouseOver, onMouseUp, onWithOptions)
 
 import Html.Events exposing (defaultOptions)
 import Html.Typed.Internal exposing (Attribute, on, onWithOptions)

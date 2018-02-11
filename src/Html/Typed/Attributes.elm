@@ -4,6 +4,6 @@ import Html
 import Html.Typed.Internal exposing (Attribute)
 
 
-fromRaw : Html.Attribute msg -> Attribute attrs msg
-fromRaw =
+attr : Html.Attribute msg -> Attribute attrs msg
+attr =
     Html.Typed.Internal.fromRaw

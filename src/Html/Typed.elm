@@ -1,4 +1,4 @@
-module Html.Typed exposing (A, Abbr, Address, Article, Aside, Attribute, Audio, B, Bdi, Bdo, Blockquote, Body, Br, Button, Canvas, Caption, Cite, Code, Col, Colgroup, Datalist, Dd, Del, Detail, Dfn, Dl, Em, Embed, Fieldset, Figcaption, Figure, Footer, Form, H1, H2, H3, H4, H5, H6, Header, Hr, Html, I, Iframe, Img, Input, Ins, Kbd, Keygen, Label, Legend, Li, Main, Mark, Math, Menu, Menuitem, Meter, Nav, Object, Ol, Optgroup, Option, Output, P, Param, Pre, Progress, Q, Rp, Rt, Ruby, S, Samp, Section, Select, Small, Source, Strong, Sub, Summary, Sup, Table, Tbody, Td, Textarea, Tfoot, Th, Thead, Time, Tr, Track, U, Ul, Var, Video, Wbr, a, abbr, add, address, article, aside, audio, b, bdi, bdo, body, br, button, canvas, caption, cite, code, col, colgroup, datalist, dd, debug, del, detail, dfn, div, dl, em, embed, fieldset, figcaption, figure, footer, form, fromRaw, h1, h2, h3, h4, h5, h6, header, hr, i, iframe, img, input, ins, kbd, keyedList, keygen, label, legend, li, list, main_, map, mark, math, menu, menuitem, meter, name, nav, object, ol, optgroup, option, output, p, param, pre, progress, q, rp, rt, ruby, s, samp, section, select, small, source, span, strong, sub, summary, sup, table, tbody, td, text, textarea, tfoot, th, thead, time, toRaw, tr, track, u, ul, var, video, wbr, within)
+module Html.Typed exposing (A, Abbr, Address, Article, Aside, Attribute, Audio, B, Bdi, Bdo, Blockquote, Body, Br, Button, Canvas, Caption, Cite, Code, Col, Colgroup, Datalist, Dd, Del, Detail, Dfn, Dl, Em, Embed, Fieldset, Figcaption, Figure, Footer, Form, H1, H2, H3, H4, H5, H6, Header, Hr, Html, I, Iframe, Img, Input, Ins, Kbd, Keygen, Label, Legend, Li, Main, Mark, Math, Menu, Menuitem, Meter, Nav, Object, Ol, Optgroup, Option, Output, P, Param, Pre, Progress, Q, Rp, Rt, Ruby, S, Samp, Section, Select, Small, Source, Strong, Sub, Summary, Sup, Table, Tbody, Td, Textarea, Tfoot, Th, Thead, Time, Tr, Track, U, Ul, Var, Video, Wbr, a, abbr, add, address, article, aside, audio, b, bdi, bdo, body, br, button, canvas, caption, cite, code, col, colgroup, datalist, dd, debug, del, detail, dfn, div, dl, em, embed, empty, fieldset, figcaption, figure, footer, form, fromRaw, h1, h2, h3, h4, h5, h6, header, hr, i, iframe, img, input, ins, kbd, keyedList, keygen, label, legend, li, list, main_, map, mark, math, menu, menuitem, meter, named, nav, object, ol, optgroup, option, output, p, param, pre, progress, q, rp, rt, ruby, s, samp, section, select, small, source, span, strong, sub, summary, sup, table, tbody, td, text, textarea, tfoot, th, thead, time, toRaw, tr, track, u, ul, var, video, wbr, within)
 
 import Html
 import Html.Keyed
@@ -410,6 +410,7 @@ type SubHtml msg
     | List (List (SubHtml msg))
     | KeyedList (List ( String, SubHtml msg ))
     | Raw (Html.Html msg)
+    | Empty
 
 
 toSubHtml : Html tipe msg -> SubHtml msg
@@ -965,27 +966,32 @@ map fn (Html subHtml) =
     Html (mapSubHtml fn subHtml)
 
 
-{-| Name a view type to have that name appear in compiler errors rather than a
+empty : Html () msg
+empty =
+    Html Empty
+
+
+{-| Name a view type to have that named appear in compiler errors rather than a
 tree of html types.
 
 Suppose your social network app contains a chatbox widget. Ordinarily view
 compilation errors of parts of your page that include the widget would contain
-the tree-like Html type describing the widget. Using `name` we can make it that
-we only see the widget name instead.
+the tree-like Html type describing the widget. Using `named` we can make it that
+we only see the widget named instead.
 
     type ChatBoxWidget
         = ChatBoxWidget ( H2 String, List Message )
 
     view : Model -> Html ChatBoxWidget msg
     view model =
-        name ChatBoxWidget
+        named ChatBoxWidget
             ( h2 (text "Chatbox")
             , list (List.map viewMessage model.messages)
             )
 
 -}
-name : (a -> b) -> Html a msg -> Html b msg
-name _ (Html subHtml) =
+named : (a -> b) -> Html a msg -> Html b msg
+named _ (Html subHtml) =
     Html subHtml
 
 
@@ -1006,6 +1012,9 @@ mapSubHtml fn subHtml =
 
         Raw html ->
             Raw (Html.map fn html)
+
+        Empty ->
+            Empty
 
 
 
@@ -1044,6 +1053,9 @@ mkSubHtml attrs subHtml =
         Raw html ->
             html
 
+        Empty ->
+            Html.text ""
+
 
 toChildren : SubHtml msg -> List (SubHtml msg)
 toChildren subHtml =
@@ -1061,4 +1073,7 @@ toChildren subHtml =
             [ subHtml ]
 
         Raw _ ->
+            []
+
+        Empty ->
             []
