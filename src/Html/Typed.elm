@@ -1,6 +1,7 @@
-module Html.Typed exposing (A, Abbr, Address, Article, Aside, Attribute, Audio, B, Bdi, Bdo, Blockquote, Body, Br, Button, Canvas, Caption, Cite, Code, Col, Colgroup, Datalist, Dd, Del, Detail, Dfn, Dl, Em, Embed, Fieldset, Figcaption, Figure, Footer, Form, H1, H2, H3, H4, H5, H6, Header, Hr, Html, I, Iframe, Img, Input, Ins, Kbd, Keygen, Label, Legend, Li, Main, Mark, Math, Menu, Menuitem, Meter, Nav, Object, Ol, Optgroup, Option, Output, P, Param, Pre, Progress, Q, Rp, Rt, Ruby, S, Samp, Section, Select, Small, Source, Strong, Sub, Summary, Sup, Table, Tbody, Td, Textarea, Tfoot, Th, Thead, Time, Tr, Track, U, Ul, Var, Video, Wbr, a, abbr, add, address, article, aside, audio, b, bdi, bdo, body, br, button, canvas, caption, cite, code, col, colgroup, datalist, dd, debug, del, detail, dfn, div, dl, em, embed, fieldset, figcaption, figure, footer, form, fromRaw, h1, h2, h3, h4, h5, h6, header, hr, i, iframe, img, input, ins, kbd, keygen, label, legend, li, list, main_, map, mark, math, menu, menuitem, meter, name, nav, object, ol, optgroup, option, output, p, param, pre, progress, q, rp, rt, ruby, s, samp, section, select, small, source, span, strong, sub, summary, sup, table, tbody, td, text, textarea, tfoot, th, thead, time, toRaw, tr, track, u, ul, var, video, wbr, within)
+module Html.Typed exposing (A, Abbr, Address, Article, Aside, Attribute, Audio, B, Bdi, Bdo, Blockquote, Body, Br, Button, Canvas, Caption, Cite, Code, Col, Colgroup, Datalist, Dd, Del, Detail, Dfn, Dl, Em, Embed, Fieldset, Figcaption, Figure, Footer, Form, H1, H2, H3, H4, H5, H6, Header, Hr, Html, I, Iframe, Img, Input, Ins, Kbd, Keygen, Label, Legend, Li, Main, Mark, Math, Menu, Menuitem, Meter, Nav, Object, Ol, Optgroup, Option, Output, P, Param, Pre, Progress, Q, Rp, Rt, Ruby, S, Samp, Section, Select, Small, Source, Strong, Sub, Summary, Sup, Table, Tbody, Td, Textarea, Tfoot, Th, Thead, Time, Tr, Track, U, Ul, Var, Video, Wbr, a, abbr, add, address, article, aside, audio, b, bdi, bdo, body, br, button, canvas, caption, cite, code, col, colgroup, datalist, dd, debug, del, detail, dfn, div, dl, em, embed, fieldset, figcaption, figure, footer, form, fromRaw, h1, h2, h3, h4, h5, h6, header, hr, i, iframe, img, input, ins, kbd, keyedList, keygen, label, legend, li, list, main_, map, mark, math, menu, menuitem, meter, name, nav, object, ol, optgroup, option, output, p, param, pre, progress, q, rp, rt, ruby, s, samp, section, select, small, source, span, strong, sub, summary, sup, table, tbody, td, text, textarea, tfoot, th, thead, time, toRaw, tr, track, u, ul, var, video, wbr, within)
 
 import Html
+import Html.Keyed
 import Html.Typed.Internal exposing (SubAttribute, mapAttr, mkAttr, toSubAttr)
 
 
@@ -407,6 +408,7 @@ type SubHtml msg
     = Node String (List (SubAttribute msg)) (SubHtml msg)
     | Text String
     | List (List (SubHtml msg))
+    | KeyedList (List ( String, SubHtml msg ))
     | Raw (Html.Html msg)
 
 
@@ -924,6 +926,11 @@ list xs =
     Html <| List (List.map toSubHtml xs)
 
 
+keyedList : List ( String, Html tipe msg ) -> Html (List tipe) msg
+keyedList xs =
+    Html <| KeyedList (List.map (Tuple.mapSecond toSubHtml) xs)
+
+
 within : (a -> b) -> Html (a -> b) msg
 within _ =
     Html <| List []
@@ -994,6 +1001,9 @@ mapSubHtml fn subHtml =
         List children ->
             List (List.map (mapSubHtml fn) children)
 
+        KeyedList children ->
+            KeyedList (List.map (Tuple.mapSecond (mapSubHtml fn)) children)
+
         Raw html ->
             Raw (Html.map fn html)
 
@@ -1025,6 +1035,12 @@ mkSubHtml attrs subHtml =
         List children ->
             Html.div attrs (List.map (mkSubHtml []) children)
 
+        KeyedList children ->
+            Html.Keyed.node
+                "div"
+                attrs
+                (List.map (Tuple.mapSecond (mkSubHtml [])) children)
+
         Raw html ->
             html
 
@@ -1040,6 +1056,9 @@ toChildren subHtml =
 
         List children ->
             children
+
+        KeyedList children ->
+            [ subHtml ]
 
         Raw _ ->
             []
