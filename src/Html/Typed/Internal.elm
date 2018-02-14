@@ -12,7 +12,9 @@ type Attribute attrs msg
 
 type SubAttribute msg
     = On String Html.Events.Options (Decoder msg)
-    | Raw (Html.Attribute msg)
+    | Style (List ( String, String ))
+    | Attribute_ String String
+    | Property String Json.Decode.Value
 
 
 mkAttr : SubAttribute msg -> Html.Attribute msg
@@ -21,13 +23,14 @@ mkAttr attr =
         On event options msgDecoder ->
             Html.Events.onWithOptions event options msgDecoder
 
-        Raw attr ->
-            attr
+        Style list ->
+            Html.Attributes.style list
 
+        Attribute_ name value ->
+            Html.Attributes.attribute name value
 
-fromRaw : Html.Attribute msg -> Attribute attrs msg
-fromRaw attr =
-    Attribute (Raw attr)
+        Property name value ->
+            Html.Attributes.property name value
 
 
 toSubAttr : Attribute attrs msg -> SubAttribute msg
@@ -45,11 +48,22 @@ onWithOptions event options msgDecoder =
     Attribute (On event options msgDecoder)
 
 
-mapAttr : (msgA -> msgB) -> SubAttribute msgA -> SubAttribute msgB
-mapAttr fn attr =
+mapAttr : (a -> msg) -> Attribute attrs a -> Attribute attrs msg
+mapAttr fn (Attribute attr) =
+    Attribute (mapSubAttr fn attr)
+
+
+mapSubAttr : (a -> msg) -> SubAttribute a -> SubAttribute msg
+mapSubAttr fn attr =
     case attr of
         On event options msgDecoder ->
             On event options (Json.Decode.map fn msgDecoder)
 
-        Raw attr ->
-            Raw (Html.Attributes.map fn attr)
+        Style list ->
+            Style list
+
+        Attribute_ name value ->
+            Attribute_ name value
+
+        Property name value ->
+            Property name value

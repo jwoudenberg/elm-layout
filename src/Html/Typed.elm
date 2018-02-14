@@ -30,7 +30,7 @@ These are coulnterparts to the html element constructors exported from elm-lang/
 
 import Html
 import Html.Keyed
-import Html.Typed.Internal exposing (SubAttribute, mapAttr, mkAttr, toSubAttr)
+import Html.Typed.Internal exposing (SubAttribute, mapSubAttr, mkAttr, toSubAttr)
 
 
 {-| -}
@@ -1245,7 +1245,7 @@ mapSubHtml : (msgA -> msgB) -> SubHtml msgA -> SubHtml msgB
 mapSubHtml fn subHtml =
     case subHtml of
         Node tag attrs child ->
-            Node tag (List.map (mapAttr fn) attrs) (mapSubHtml fn child)
+            Node tag (List.map (mapSubAttr fn) attrs) (mapSubHtml fn child)
 
         Text text ->
             Text text

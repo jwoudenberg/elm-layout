@@ -8,7 +8,6 @@ Based on the original TodoMVC which can be found here: <https://github.com/evanc
 
 import Dom
 import Html
-import Html.Attributes exposing (..)
 import Html.Events exposing (keyCode)
 import Html.Typed exposing (..)
 import Html.Typed.Attributes exposing (..)
@@ -276,12 +275,12 @@ type alias Link =
 view : Model -> Html Page Msg
 view model =
     div
-        [ attr <| class "todomvc-wrapper"
-        , attr <| style [ ( "visibility", "hidden" ) ]
+        [ class "todomvc-wrapper"
+        , style [ ( "visibility", "hidden" ) ]
         ]
         (into2 Page
             (section
-                [ attr <| class "todoapp" ]
+                [ class "todoapp" ]
                 (into3 PageBody
                     (viewInput model.field)
                     (viewEntries model.visibility model.entries)
@@ -295,15 +294,15 @@ view model =
 viewInput : String -> Html PageHeader Msg
 viewInput task =
     header
-        [ attr <| class "header" ]
+        [ class "header" ]
         (into2 InputContent
             (h1 [] (text "todos"))
             (input
-                [ attr <| class "new-todo"
-                , attr <| placeholder "What needs to be done?"
-                , attr <| autofocus True
-                , attr <| value task
-                , attr <| name "newTodo"
+                [ class "new-todo"
+                , placeholder "What needs to be done?"
+                , autofocus True
+                , value task
+                , name "newTodo"
                 , onInput UpdateField
                 , onEnter Add
                 ]
@@ -352,25 +351,25 @@ viewEntries visibility entries =
                 "visible"
     in
     section
-        [ attr <| class "main"
-        , attr <| style [ ( "visibility", cssVisibility ) ]
+        [ class "main"
+        , style [ ( "visibility", cssVisibility ) ]
         ]
         (into3 EntriesContent
             (input
-                [ attr <| class "toggle-all"
-                , attr <| type_ "checkbox"
-                , attr <| name "toggle"
-                , attr <| checked allCompleted
+                [ class "toggle-all"
+                , type_ "checkbox"
+                , name "toggle"
+                , checked allCompleted
                 , onClick (CheckAll (not allCompleted))
                 ]
                 empty
             )
             (label
-                [ attr <| for "toggle-all" ]
+                [ for "toggle-all" ]
                 (text "Mark all as complete")
             )
             (ul
-                [ attr <| class "todo-list" ]
+                [ class "todo-list" ]
                 (keyedList <|
                     List.map viewKeyedEntry (List.filter isVisible entries)
                 )
@@ -390,15 +389,15 @@ viewKeyedEntry todo =
 viewEntry : Entry -> Html TodoItem Msg
 viewEntry todo =
     li
-        [ attr <| classList [ ( "completed", todo.completed ), ( "editing", todo.editing ) ] ]
+        [ classList [ ( "completed", todo.completed ), ( "editing", todo.editing ) ] ]
         (into2 TodoItemContents
             (div
-                [ attr <| class "view" ]
+                [ class "view" ]
                 (into3 ViewMode
                     (input
-                        [ attr <| class "toggle"
-                        , attr <| type_ "checkbox"
-                        , attr <| checked todo.completed
+                        [ class "toggle"
+                        , type_ "checkbox"
+                        , checked todo.completed
                         , onClick (Check todo.id (not todo.completed))
                         ]
                         empty
@@ -408,7 +407,7 @@ viewEntry todo =
                         (text todo.description)
                     )
                     (button
-                        [ attr <| class "destroy"
+                        [ class "destroy"
                         , onClick (Delete todo.id)
                         ]
                         empty
@@ -416,10 +415,10 @@ viewEntry todo =
                 )
             )
             (input
-                [ attr <| class "edit"
-                , attr <| value todo.description
-                , attr <| name "title"
-                , attr <| id ("todo-" ++ toString todo.id)
+                [ class "edit"
+                , value todo.description
+                , name "title"
+                , id ("todo-" ++ toString todo.id)
                 , onInput (UpdateEntry todo.id)
                 , onBlur (EditingEntry todo.id False)
                 , onEnter (EditingEntry todo.id False)
@@ -443,8 +442,8 @@ viewControls visibility entries =
             List.length entries - entriesCompleted
     in
     footer
-        [ attr <| class "footer"
-        , attr <| hidden (List.isEmpty entries)
+        [ class "footer"
+        , hidden (List.isEmpty entries)
         ]
         (into3 ControlsContent
             (viewControlsCount entriesLeft)
@@ -463,7 +462,7 @@ viewControlsCount entriesLeft =
                 " items"
     in
     span
-        [ attr <| class "todo-count" ]
+        [ class "todo-count" ]
         (into2 ControlsCount
             (strong [] (text (toString entriesLeft)))
             (text (item_ ++ " left"))
@@ -473,7 +472,7 @@ viewControlsCount entriesLeft =
 viewControlsFilters : String -> Html ControlsFilters Msg
 viewControlsFilters visibility =
     ul
-        [ attr <| class "filters" ]
+        [ class "filters" ]
         (into5 ControlsFiltersContent
             (visibilitySwap "#/" "All" visibility)
             (text " ")
@@ -487,7 +486,7 @@ visibilitySwap : String -> String -> String -> Html Filter Msg
 visibilitySwap uri visibility actualVisibility =
     li
         [ onClick (ChangeVisibility visibility) ]
-        (a [ attr <| href uri, attr <| classList [ ( "selected", visibility == actualVisibility ) ] ]
+        (a [ href uri, classList [ ( "selected", visibility == actualVisibility ) ] ]
             (text visibility)
         )
 
@@ -495,8 +494,8 @@ visibilitySwap uri visibility actualVisibility =
 viewControlsClear : Int -> Html ControlsClear Msg
 viewControlsClear entriesCompleted =
     button
-        [ attr <| class "clear-completed"
-        , attr <| hidden (entriesCompleted == 0)
+        [ class "clear-completed"
+        , hidden (entriesCompleted == 0)
         , onClick DeleteComplete
         ]
         (text ("Clear completed (" ++ toString entriesCompleted ++ ")"))
@@ -504,19 +503,19 @@ viewControlsClear entriesCompleted =
 
 infoFooter : Html PageFooter msg
 infoFooter =
-    footer [ attr <| class "info" ]
+    footer [ class "info" ]
         (into3 (,,)
             (p [] (text "Double-click to edit a todo"))
             (p []
                 (into2 (,)
                     (text "Written by ")
-                    (a [ attr <| href "https://github.com/evancz" ] (text "Evan Czaplicki"))
+                    (a [ href "https://github.com/evancz" ] (text "Evan Czaplicki"))
                 )
             )
             (p []
                 (into2 (,)
                     (text "Part of ")
-                    (a [ attr <| href "http://todomvc.com" ] (text "TodoMVC"))
+                    (a [ href "http://todomvc.com" ] (text "TodoMVC"))
                 )
             )
         )
