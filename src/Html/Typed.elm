@@ -1,4 +1,4 @@
-module Html.Typed exposing (A, Abbr, Address, Article, Aside, Attribute, Audio, B, Bdi, Bdo, Blockquote, Body, Br, Button, Canvas, Caption, Cite, Code, Col, Colgroup, Datalist, Dd, Del, Detail, Dfn, Dl, Em, Embed, Fieldset, Figcaption, Figure, Footer, Form, H1, H2, H3, H4, H5, H6, Header, Hr, Html, I, Iframe, Img, Input, Ins, Kbd, Keygen, Label, Legend, Li, Main, Mark, Math, Menu, Menuitem, Meter, Nav, Object, Ol, Optgroup, Option, Output, P, Param, Pre, Progress, Q, Rp, Rt, Ruby, S, Samp, Section, Select, Small, Source, Strong, Sub, Summary, Sup, Table, Tbody, Td, Textarea, Tfoot, Th, Thead, Time, Tr, Track, U, Ul, Var, Video, Wbr, a, abbr, add, address, article, aside, audio, b, bdi, bdo, body, br, button, canvas, caption, cite, code, col, colgroup, datalist, dd, debug, del, detail, dfn, div, dl, em, embed, empty, fieldset, figcaption, figure, footer, form, fromRaw, h1, h2, h3, h4, h5, h6, header, hr, i, iframe, img, input, ins, kbd, keyedList, keygen, label, legend, li, list, main_, map, mark, math, menu, menuitem, meter, named, nav, object, ol, optgroup, option, output, p, param, pre, progress, q, rp, rt, ruby, s, samp, section, select, small, source, span, strong, sub, summary, sup, table, tbody, td, text, textarea, tfoot, th, thead, time, toRaw, tr, track, u, ul, var, video, wbr, within)
+module Html.Typed exposing (A, Abbr, Address, Article, Aside, Attribute, Audio, B, Bdi, Bdo, Blockquote, Body, Br, Button, Canvas, Caption, Cite, Code, Col, Colgroup, Datalist, Dd, Del, Detail, Dfn, Dl, Em, Embed, Fieldset, Figcaption, Figure, Footer, Form, H1, H2, H3, H4, H5, H6, Header, Hr, Html, I, Iframe, Img, Input, Ins, Kbd, Keygen, Label, Legend, Li, Main, Mark, Math, Menu, Menuitem, Meter, Nav, Object, Ol, Optgroup, Option, Output, P, Param, Pre, Progress, Q, Rp, Rt, Ruby, S, Samp, Section, Select, Small, Source, Strong, Sub, Summary, Sup, Table, Tbody, Td, Textarea, Tfoot, Th, Thead, Time, Tr, Track, U, Ul, Var, Video, Wbr, a, abbr, add, address, article, aside, audio, b, bdi, bdo, body, br, button, canvas, caption, cite, code, col, colgroup, datalist, dd, debug, del, detail, dfn, div, dl, em, embed, empty, fieldset, figcaption, figure, footer, form, fromRaw, h1, h2, h3, h4, h5, h6, header, hr, i, iframe, img, input, ins, into, into2, into3, into4, into5, into6, into7, into8, kbd, keyedList, keygen, label, legend, li, list, main_, map, mark, math, menu, menuitem, meter, nav, object, ol, optgroup, option, output, p, param, pre, progress, q, rp, rt, ruby, s, samp, section, select, small, source, span, strong, sub, summary, sup, table, tbody, td, text, textarea, tfoot, th, thead, time, toRaw, tr, track, u, ul, var, video, wbr, within)
 
 {-|
 
@@ -12,7 +12,7 @@ These Html and Attribute types can be used instead of the versions exported from
 ## Extra functions functions
 
 These functions are unique to Html.Typed and do not have counterparts in elm-lang/html.
-@docs within, add, named, list, keyedList
+@docs within, add, into, into2, into3, into4, into5, into6, into7, into8, list, keyedList
 
 
 ## Html element types
@@ -1199,28 +1199,70 @@ empty =
     Html Empty
 
 
-{-| Name a view type to have that named appear in compiler errors rather than a
-tree of html types.
+{-| Wrap a view in a type to have that type appear in compiler errors rather
+than a tree of html types.
 
 Suppose your social network app contains a chatbox widget. Ordinarily view
 compilation errors of parts of your page that include the widget would contain
-the tree-like Html type describing the widget. Using `named` we can make it that
-we only see the widget named instead.
+the tree-like Html type describing the widget. Using `into` we can make it that
+we only see the widget into instead.
 
     type ChatBoxWidget
         = ChatBoxWidget ( H2 String, List Message )
 
     view : Model -> Html ChatBoxWidget msg
     view model =
-        named ChatBoxWidget
+        into ChatBoxWidget
             ( h2 (text "Chatbox")
             , list (List.map viewMessage model.messages)
             )
 
 -}
-named : (a -> b) -> Html a msg -> Html b msg
-named _ (Html subHtml) =
+into : (a -> b) -> Html a msg -> Html b msg
+into _ (Html subHtml) =
     Html subHtml
+
+
+{-| -}
+into2 : (a -> b -> c) -> Html a msg -> Html b msg -> Html c msg
+into2 _ (Html subHtml1) (Html subHtml2) =
+    Html <| List [ subHtml1, subHtml2 ]
+
+
+{-| -}
+into3 : (a -> b -> c -> d) -> Html a msg -> Html b msg -> Html c msg -> Html d msg
+into3 _ (Html subHtml1) (Html subHtml2) (Html subHtml3) =
+    Html <| List [ subHtml1, subHtml2, subHtml3 ]
+
+
+{-| -}
+into4 : (a -> b -> c -> d -> e) -> Html a msg -> Html b msg -> Html c msg -> Html d msg -> Html e msg
+into4 _ (Html subHtml1) (Html subHtml2) (Html subHtml3) (Html subHtml4) =
+    Html <| List [ subHtml1, subHtml2, subHtml3, subHtml4 ]
+
+
+{-| -}
+into5 : (a -> b -> c -> d -> e -> f) -> Html a msg -> Html b msg -> Html c msg -> Html d msg -> Html e msg -> Html f msg
+into5 _ (Html subHtml1) (Html subHtml2) (Html subHtml3) (Html subHtml4) (Html subHtml5) =
+    Html <| List [ subHtml1, subHtml2, subHtml3, subHtml4, subHtml5 ]
+
+
+{-| -}
+into6 : (a -> b -> c -> d -> e -> f -> g) -> Html a msg -> Html b msg -> Html c msg -> Html d msg -> Html e msg -> Html f msg -> Html g msg
+into6 _ (Html subHtml1) (Html subHtml2) (Html subHtml3) (Html subHtml4) (Html subHtml5) (Html subHtml6) =
+    Html <| List [ subHtml1, subHtml2, subHtml3, subHtml4, subHtml5, subHtml6 ]
+
+
+{-| -}
+into7 : (a -> b -> c -> d -> e -> f -> g -> h) -> Html a msg -> Html b msg -> Html c msg -> Html d msg -> Html e msg -> Html f msg -> Html g msg -> Html h msg
+into7 _ (Html subHtml1) (Html subHtml2) (Html subHtml3) (Html subHtml4) (Html subHtml5) (Html subHtml6) (Html subHtml7) =
+    Html <| List [ subHtml1, subHtml2, subHtml3, subHtml4, subHtml5, subHtml6, subHtml7 ]
+
+
+{-| -}
+into8 : (a -> b -> c -> d -> e -> f -> g -> h -> i) -> Html a msg -> Html b msg -> Html c msg -> Html d msg -> Html e msg -> Html f msg -> Html g msg -> Html h msg -> Html i msg
+into8 _ (Html subHtml1) (Html subHtml2) (Html subHtml3) (Html subHtml4) (Html subHtml5) (Html subHtml6) (Html subHtml7) (Html subHtml8) =
+    Html <| List [ subHtml1, subHtml2, subHtml3, subHtml4, subHtml5, subHtml6, subHtml7, subHtml8 ]
 
 
 mapSubHtml : (msgA -> msgB) -> SubHtml msgA -> SubHtml msgB

@@ -90,16 +90,15 @@ view model =
                 |> List.filter (\p -> Just p.id == model.currentPost)
                 |> List.head
     in
-        within Page
-            |> add viewHeader
-            |> add
-                (case currentPost of
-                    Nothing ->
-                        name ListPosts <| viewHome model.posts
+    into2 Page
+        viewHeader
+        (case currentPost of
+            Nothing ->
+                into ListPosts <| viewHome model.posts
 
-                    Just post ->
-                        name SinglePost <| viewPost post
-                )
+            Just post ->
+                into SinglePost <| viewPost post
+        )
 
 
 viewHeader : Html Header Msg
@@ -114,10 +113,10 @@ viewHome posts =
 
 viewPost : Post -> Html SinglePost Msg
 viewPost post =
-    within PostBody
-        |> add (viewTitle post)
-        |> add (p [] <| text post.content)
-        |> section []
+    section [] <|
+        into2 PostBody
+            (viewTitle post)
+            (p [] <| text post.content)
 
 
 viewTitle : Post -> Html PostTitle Msg
