@@ -1,4 +1,4 @@
-module Html.Typed exposing (A, Abbr, Address, Article, Aside, Attribute, Audio, B, Bdi, Bdo, Blockquote, Body, Br, Button, Canvas, Caption, Cite, Code, Col, Colgroup, Datalist, Dd, Del, Detail, Dfn, Dl, Em, Embed, Fieldset, Figcaption, Figure, Footer, Form, H1, H2, H3, H4, H5, H6, Header, Hr, Html, I, Iframe, Img, Input, Ins, Kbd, Keygen, Label, Legend, Li, Main, Mark, Math, Menu, Menuitem, Meter, Nav, Object, Ol, Optgroup, Option, Output, P, Param, Pre, Progress, Q, Rp, Rt, Ruby, S, Samp, Section, Select, Small, Source, Strong, Sub, Summary, Sup, Table, Tbody, Td, Textarea, Tfoot, Th, Thead, Time, Tr, Track, U, Ul, Var, Video, Wbr, a, abbr, add, address, article, aside, audio, b, bdi, bdo, body, br, button, canvas, caption, cite, code, col, colgroup, datalist, dd, debug, del, detail, dfn, div, dl, em, embed, empty, fieldset, figcaption, figure, footer, form, fromRaw, h1, h2, h3, h4, h5, h6, header, hr, i, iframe, img, input, ins, into, into2, into3, into4, into5, into6, into7, into8, kbd, keyedList, keygen, label, legend, li, list, main_, map, mark, math, menu, menuitem, meter, nav, object, ol, optgroup, option, output, p, param, pre, progress, q, rp, rt, ruby, s, samp, section, select, small, source, span, strong, sub, summary, sup, table, tbody, td, text, textarea, tfoot, th, thead, time, toRaw, tr, track, u, ul, var, video, wbr, within)
+module Html.Typed exposing (A, Abbr, Address, Article, Aside, Attribute, Audio, B, Bdi, Bdo, Blockquote, Body, Br, Button, Canvas, Caption, Cite, Code, Col, Colgroup, Datalist, Dd, Del, Detail, Dfn, Dl, Em, Embed, Fieldset, Figcaption, Figure, Footer, Form, H1, H2, H3, H4, H5, H6, Header, Hr, Html, I, Iframe, Img, Input, Ins, Kbd, Keygen, Label, Legend, Li, Main, Mark, Math, Menu, Menuitem, Meter, Nav, Object, Ol, Optgroup, Option, Output, P, Param, Pre, Progress, Q, Rp, Rt, Ruby, S, Samp, Section, Select, Small, Source, Strong, Sub, Summary, Sup, Table, Tbody, Td, Textarea, Tfoot, Th, Thead, Time, Tr, Track, U, Ul, Var, Video, Wbr, a, abbr, address, article, aside, audio, b, bdi, bdo, body, br, button, canvas, caption, cite, code, col, colgroup, datalist, dd, debug, del, detail, dfn, div, dl, em, embed, empty, fieldset, figcaption, figure, footer, form, fromRaw, h1, h2, h3, h4, h5, h6, header, hr, i, iframe, img, input, ins, into, into2, into3, into4, into5, into6, into7, into8, kbd, keyedList, keygen, label, legend, li, list, main_, map, mark, math, menu, menuitem, meter, nav, object, ol, optgroup, option, output, p, param, pre, progress, q, rp, rt, ruby, s, samp, section, select, small, source, span, strong, sub, summary, sup, table, tbody, td, text, textarea, tfoot, th, thead, time, toRaw, tr, track, u, ul, var, video, wbr)
 
 {-|
 
@@ -12,7 +12,7 @@ These Html and Attribute types can be used instead of the versions exported from
 ## Extra functions functions
 
 These functions are unique to Html.Typed and do not have counterparts in elm-lang/html.
-@docs within, add, into, into2, into3, into4, into5, into6, into7, into8, list, keyedList
+@docs into, into2, into3, into4, into5, into6, into7, into8, list, keyedList
 
 
 ## Html element types
@@ -1154,30 +1154,6 @@ list xs =
 keyedList : List ( String, Html tipe msg ) -> Html (List tipe) msg
 keyedList xs =
     Html <| KeyedList (List.map (Tuple.mapSecond toSubHtml) xs)
-
-
-{-| -}
-within : (a -> b) -> Html (a -> b) msg
-within _ =
-    Html <| List []
-
-
-{-| -}
-add : Html tipe1 msg -> Html (tipe1 -> tipe2) msg -> Html tipe2 msg
-add child2 child1 =
-    Html <|
-        case ( toSubHtml child1, toSubHtml child2 ) of
-            ( List xs, List ys ) ->
-                List (xs ++ ys)
-
-            ( List xs, y ) ->
-                List (xs ++ [ y ])
-
-            ( x, List ys ) ->
-                List (x :: ys)
-
-            ( x, y ) ->
-                List [ x, y ]
 
 
 {-| Useful during development, to get unimplemented parts of view functions compiling.
